@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink } from "lucide-react";
+import { Copy, ExternalLink } from "lucide-react";
 import { useExit } from "@/lib/useExit";
 import type { Post, PostType, Status } from "@/lib/types";
 import { POST_TYPES, STATUSES, STATUS_META, TYPE_META } from "@/lib/types";
 import { fromLocalInput, toLocalInput } from "@/lib/dates";
 import { usePlanner } from "./PlannerProvider";
 import ImageField from "./ImageField";
+import DateTimePicker from "./DateTimePicker";
 
 export default function PostDrawer({
   post,
@@ -67,10 +68,10 @@ export default function PostDrawer({
     if (saved) onClose();
   }
 
-  async function copyCaption() {
+  async function copyText(text: string, done: string) {
     try {
-      await navigator.clipboard.writeText([caption, hashtags].filter(Boolean).join("\n\n"));
-      toast("Caption copied");
+      await navigator.clipboard.writeText(text);
+      toast(done);
     } catch {
       toast("Couldn’t copy. Select the text instead.");
     }
@@ -155,13 +156,7 @@ export default function PostDrawer({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="label" htmlFor="when">Planned to post</label>
-              <input
-                id="when"
-                type="datetime-local"
-                className="field"
-                value={when}
-                onChange={(e) => setWhen(e.target.value)}
-              />
+              <DateTimePicker id="when" value={when} onChange={setWhen} />
             </div>
             <div>
               <label className="label" htmlFor="type">Post type</label>
@@ -180,77 +175,102 @@ export default function PostDrawer({
             </div>
           </div>
 
-          <section className="rounded-lg border border-line p-4">
-            <h3 className="mb-3 text-sm font-semibold">Inspiration</h3>
-            <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="grid gap-6 sm:grid-cols-2 sm:gap-4">
+            <div>
               <ImageField
-                label="Screenshot"
+                label="Inspiration"
                 hint="Screenshot of the reel or post"
                 value={inspoImg}
                 onChange={setInspoImg}
                 onError={toast}
               />
-              <div className="flex-1">
-                <label className="label" htmlFor="inspo">Link</label>
-                <input
-                  id="inspo"
-                  className="field"
-                  inputMode="url"
-                  placeholder="https://instagram.com/reel/…"
-                  value={inspoUrl}
-                  onChange={(e) => setInspoUrl(e.target.value)}
-                />
-                {href && (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-ghost mt-3 no-underline"
-                  >
-                    Open inspo <ExternalLink size={14} aria-hidden />
-                  </a>
-                )}
-              </div>
             </div>
-          </section>
+            <ImageField
+              label="Final thumbnail"
+              hint="Photo, or a video file to grab a frame"
+              accept="image/*,video/*"
+              value={thumb}
+              onChange={setThumb}
+              onError={toast}
+            />
+          </div>
 
-          <ImageField
-            label="Final thumbnail (optional)"
-            hint="Photo, or a video file to grab a frame"
-            accept="image/*,video/*"
-            value={thumb}
-            onChange={setThumb}
-            onError={toast}
-          />
+          <div>
+            <label className="label" htmlFor="inspo">Link</label>
+            <input
+              id="inspo"
+              className="field"
+              inputMode="url"
+              placeholder="https://instagram.com/reel/…"
+              value={inspoUrl}
+              onChange={(e) => setInspoUrl(e.target.value)}
+            />
+            {href && (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-ghost mt-3 no-underline"
+              >
+                Open inspo <ExternalLink size={14} aria-hidden />
+              </a>
+            )}
+          </div>
 
           <div>
             <div className="mb-1.5 flex items-center justify-between">
               <label className="label !mb-0" htmlFor="caption">Caption</label>
               <button
                 type="button"
-                onClick={copyCaption}
+                onClick={() => copyText([caption, hashtags].filter(Boolean).join("\n\n"), "Caption + hashtags copied")}
                 disabled={!caption && !hashtags}
-                className="text-xs font-semibold text-hl transition-opacity duration-200 hover:opacity-80 disabled:opacity-40"
+                aria-label="Copy caption + hashtags"
+                title="Copy caption + hashtags"
+                className="copy-btn"
               >
-                Copy caption + hashtags
+                <Copy size={16} aria-hidden />
               </button>
             </div>
-            <textarea
-              id="caption"
-              rows={4}
-              className="field resize-y"
-              placeholder="Write the caption…"
-              value={caption}
-              onChange={(e) => setCaption(e.target.value)}
-            />
-            <textarea
-              aria-label="Hashtags"
-              rows={2}
-              className="field mt-2 resize-y font-mono text-[13px]"
-              placeholder="#bakery #freshbread …"
-              value={hashtags}
-              onChange={(e) => setHashtags(e.target.value)}
-            />
+            <div className="relative">
+              <textarea
+                id="caption"
+                rows={4}
+                className="field resize-y pr-10"
+                placeholder="Write the caption…"
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => copyText(caption, "Caption copied")}
+                disabled={!caption}
+                aria-label="Copy caption"
+                title="Copy caption"
+                className="copy-btn absolute right-1.5 top-1.5"
+              >
+                <Copy size={15} aria-hidden />
+              </button>
+            </div>
+            <div className="relative mt-2">
+              <textarea
+                aria-label="Hashtags"
+                rows={2}
+                className="field resize-y pr-10 font-mono text-[13px]"
+                placeholder="#bakery #freshbread …"
+                value={hashtags}
+                onChange={(e) => setHashtags(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => copyText(hashtags, "Hashtags copied")}
+                disabled={!hashtags}
+                aria-label="Copy hashtags"
+                title="Copy hashtags"
+                className="copy-btn absolute right-1.5 top-1.5"
+              >
+                <Copy size={15} aria-hidden />
+              </button>
+            </div>
           </div>
 
           <div>

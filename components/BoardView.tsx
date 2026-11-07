@@ -108,8 +108,8 @@ function Column({
         </button>
       </div>
       <div className="flex min-h-24 flex-col gap-2.5">
-        {posts.map((p, i) => (
-          <DraggableCard key={p.id} post={p} index={i} onOpen={onOpen} />
+        {posts.map((p) => (
+          <DraggableCard key={p.id} post={p} onOpen={onOpen} />
         ))}
         {posts.length === 0 && (
           <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-muted">
@@ -121,7 +121,7 @@ function Column({
   );
 }
 
-function DraggableCard({ post, index, onOpen }: { post: Post; index: number; onOpen: (id: string) => void }) {
+function DraggableCard({ post, onOpen }: { post: Post; onOpen: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: post.id });
   return (
     <div
@@ -129,8 +129,7 @@ function DraggableCard({ post, index, onOpen }: { post: Post; index: number; onO
       {...listeners}
       {...attributes}
       onClick={() => onOpen(post.id)}
-      style={{ "--i": index } as React.CSSProperties}
-      className={`rise-in cursor-grab transition-opacity duration-200 ${isDragging ? "opacity-30" : ""}`}
+      className={`cursor-grab transition-opacity duration-200 ${isDragging ? "opacity-30" : ""}`}
     >
       <CardBody post={post} />
     </div>

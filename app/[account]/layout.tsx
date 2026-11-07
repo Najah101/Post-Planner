@@ -21,7 +21,7 @@ export default async function AccountLayout({
   return (
     <PlannerProvider key={account.id} account={account} initialAccounts={accounts} initialPosts={posts}>
       <TopBar />
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 pb-28 pt-5 md:pb-10">{children}</main>
+      <main className="mx-auto w-full max-w-7xl flex-1 overflow-x-clip px-4 pb-28 pt-5 md:pb-10">{children}</main>
     </PlannerProvider>
   );
 }

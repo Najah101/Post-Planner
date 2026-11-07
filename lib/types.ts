@@ -9,7 +9,7 @@ export const STATUS_META: Record<Status, { label: string; color: string }> = {
   to_edit: { label: "To edit", color: "#fbde23" },
   editing: { label: "Editing", color: "#e0716b" },
   ready: { label: "Ready", color: "#e6e8e6" },
-  posted: { label: "Posted", color: "#5c5e5c" },
+  posted: { label: "Posted", color: "#4fb477" },
 };
 
 export const TYPE_META: Record<PostType, { label: string }> = {

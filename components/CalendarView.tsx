@@ -82,9 +82,9 @@ export default function CalendarView() {
   }
 
   return (
-    <section>
+    <section className="md:flex md:h-[calc(100dvh-7.5rem)] md:flex-col">
       <div className="mb-4 flex items-center gap-2">
-        <h1 key={format(month, "yyyy-MM")} className="rise-in mr-auto text-2xl font-semibold tracking-tight">
+        <h1 key={format(month, "yyyy-MM")} className="mr-auto text-2xl font-semibold tracking-tight">
           {format(month, "MMMM yyyy")}
         </h1>
         <button onClick={() => setMonth(startOfMonth(new Date()))} className="btn btn-ghost">
@@ -109,7 +109,7 @@ export default function CalendarView() {
       </div>
 
       <DndContext id="calendar-dnd" collisionDetection={pointerWithin} sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
-        <div className="overflow-hidden rounded-lg border border-line bg-card">
+        <div className="flex flex-col overflow-hidden rounded-lg border border-line bg-card md:min-h-0 md:flex-1">
           <div className="grid grid-cols-7 border-b border-line bg-soft/60">
             {WEEKDAYS.map((d) => (
               <div key={d} className="py-2 text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-muted">
@@ -117,11 +117,14 @@ export default function CalendarView() {
               </div>
             ))}
           </div>
-          <div key={format(month, "yyyy-MM")} className="fade-in grid grid-cols-7">
-            {days.map((day, i) => (
+          <div
+            key={format(month, "yyyy-MM")}
+            style={{ gridTemplateRows: `repeat(${days.length / 7}, minmax(0, 1fr))` }}
+            className="grid grid-cols-7 md:min-h-0 md:flex-1 [&>*]:md:min-h-0 [&>*]:md:overflow-hidden"
+          >
+            {days.map((day) => (
               <DayCell
                 key={dayKey(day)}
-                index={i}
                 day={day}
                 inMonth={isSameMonth(day, month)}
                 posts={byDay.get(dayKey(day)) ?? []}
@@ -146,17 +149,16 @@ export default function CalendarView() {
       </DndContext>
 
       {unscheduled.length > 0 && (
-        <div className="mt-6">
+        <div className="mt-6 md:mt-3 md:shrink-0">
           <h2 className="mb-2 text-sm font-semibold">
             No date yet <span className="font-normal text-muted">· {unscheduled.length}</span>
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2">
-            {unscheduled.map((p, i) => (
+            {unscheduled.map((p) => (
               <button
                 key={p.id}
                 onClick={() => openPost(p.id)}
-                style={{ "--i": i } as React.CSSProperties}
-                className="rise-in group w-28 shrink-0 text-left"
+                className="group w-28 shrink-0 text-left"
               >
                 <PostThumb
                   post={p}
@@ -176,14 +178,12 @@ export default function CalendarView() {
 
 function DayCell({
   day,
-  index,
   inMonth,
   posts,
   onOpen,
   onAdd,
 }: {
   day: Date;
-  index: number;
   inMonth: boolean;
   posts: Post[];
   onOpen: (id: string) => void;
@@ -198,8 +198,7 @@ function DayCell({
     <div
       ref={setNodeRef}
       onClick={onAdd}
-      style={{ "--i": Math.min(index, 20) } as React.CSSProperties}
-      className={`rise-in group relative min-h-[84px] cursor-pointer border-b border-r border-line p-1 transition-[background-color,box-shadow] duration-200 md:min-h-[116px] md:p-1.5 [&:nth-child(7n)]:border-r-0 ${
+      className={`group relative min-h-[84px] cursor-pointer border-b border-r border-line p-1 transition-[background-color,box-shadow] duration-200 md:p-1.5 [&:nth-child(7n)]:border-r-0 ${
         inMonth ? "" : "bg-bg/60"
       } ${isOver ? "bg-hl/10 shadow-[inset_0_0_0_1px_var(--hl-line)]" : "hover:bg-[var(--wash)]"}`}
     >

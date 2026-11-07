@@ -51,7 +51,7 @@ export default function UpcomingView() {
       <h1 className="mb-5 text-2xl font-semibold tracking-tight">Upcoming</h1>
 
       {groups.length === 0 && (
-        <div className="rise-in rounded-lg border border-dashed border-line px-6 py-16 text-center">
+        <div className="rounded-lg border border-dashed border-line px-6 py-16 text-center">
           <Sparkles size={28} aria-hidden className="mx-auto text-hl" />
           <p className="mt-3 font-semibold">Nothing planned yet</p>
           <p className="mt-1 text-sm text-muted">Add your first post to start filling the calendar.</p>
@@ -62,8 +62,8 @@ export default function UpcomingView() {
       )}
 
       <div className="space-y-8">
-        {groups.map((g, gi) => (
-          <div key={g.label} className="rise-in" style={{ "--i": gi * 3 } as React.CSSProperties}>
+        {groups.map((g) => (
+          <div key={g.label}>
             <h2
               className={`mb-3 text-[11px] font-semibold uppercase tracking-[0.06em] ${
                 g.tone === "overdue" ? "text-hl" : "text-muted"
@@ -72,8 +72,8 @@ export default function UpcomingView() {
               {g.label} · {g.posts.length}
             </h2>
             <ul className="space-y-3">
-              {g.posts.map((p, i) => (
-                <li key={p.id} className="rise-in" style={{ "--i": gi * 3 + i + 1 } as React.CSSProperties}>
+              {g.posts.map((p) => (
+                <li key={p.id}>
                   <button
                     onClick={() => openPost(p.id)}
                     className="flex w-full gap-4 rounded-lg border border-line bg-card p-3 text-left transition-colors duration-200 hover:border-edge hover:bg-soft"

@@ -194,20 +194,18 @@ input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
 /* ---------- Motion ---------- */
 @keyframes rise-in {
   from {
-    opacity: 0;
-    transform: translateY(10px);
+    transform: translateX(calc(var(--dir, 1) * 28px));
   }
   to {
-    opacity: 1;
     transform: none;
   }
 }
 @keyframes fade-in {
   from {
-    opacity: 0;
+    transform: translateY(8px);
   }
   to {
-    opacity: 1;
+    transform: none;
   }
 }
 @keyframes fade-out {
@@ -215,36 +213,38 @@ input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
     opacity: 0;
   }
 }
-@keyframes pop-in {
+@keyframes scrim-in {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(-4px);
   }
   to {
     opacity: 1;
+  }
+}
+@keyframes pop-in {
+  from {
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
     transform: none;
   }
 }
 @keyframes pop-out {
   to {
-    opacity: 0;
     transform: scale(0.97) translateY(8px);
   }
 }
 @keyframes drawer-in {
   from {
-    transform: translateX(32px);
-    opacity: 0;
+    transform: translateX(100%);
   }
   to {
     transform: none;
-    opacity: 1;
   }
 }
 @keyframes drawer-out {
   to {
-    transform: translateX(32px);
-    opacity: 0;
+    transform: translateX(100%);
   }
 }
 @keyframes sheet-up {
@@ -262,17 +262,14 @@ input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
 }
 @keyframes toast-in {
   from {
-    opacity: 0;
     transform: translate(-50%, 12px);
   }
   to {
-    opacity: 1;
     transform: translate(-50%, 0);
   }
 }
 @keyframes toast-out {
   to {
-    opacity: 0;
     transform: translate(-50%, 8px);
   }
 }
@@ -291,29 +288,30 @@ input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
   animation: rise-in 0.45s var(--ease-out) both;
   animation-delay: calc(var(--i, 0) * 35ms);
 }
+.slide-x {
+  animation: slide-x 0.4s var(--ease-out) both;
+}
+@keyframes slide-x {
+  from {
+    transform: translateX(calc(var(--dir, 0) * 48px));
+  }
+  to {
+    transform: none;
+  }
+}
 .fade-in {
   animation: fade-in 0.25s var(--ease-out) both;
 }
-/* Children ease in one after another (drawer form fields) */
-.drawer-in .space-y-6 > * {
-  animation: rise-in 0.45s var(--ease-out) both;
-}
-.drawer-in .space-y-6 > :nth-child(1) { animation-delay: 120ms; }
-.drawer-in .space-y-6 > :nth-child(2) { animation-delay: 160ms; }
-.drawer-in .space-y-6 > :nth-child(3) { animation-delay: 200ms; }
-.drawer-in .space-y-6 > :nth-child(4) { animation-delay: 240ms; }
-.drawer-in .space-y-6 > :nth-child(5) { animation-delay: 280ms; }
-.drawer-in .space-y-6 > :nth-child(n + 6) { animation-delay: 320ms; }
 .pop-in {
   animation: pop-in 0.22s var(--ease-out) both;
   transform-origin: top left;
 }
 .scrim {
   background: var(--scrim);
-  animation: fade-in 0.28s var(--ease-out) both;
+  animation: scrim-in 0.4s var(--ease-out) both;
 }
 .drawer-in {
-  animation: drawer-in 0.38s var(--ease-out) both;
+  animation: drawer-in 0.4s var(--ease-out) both;
 }
 .sheet-in {
   animation: pop-in 0.3s var(--ease-out) both;
@@ -350,18 +348,15 @@ input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
 
 /* Menu: stays mounted so it can transition both ways */
 .menu {
-  opacity: 0;
   visibility: hidden;
   transform: scale(0.96) translateY(-4px);
   transform-origin: top left;
   pointer-events: none;
   transition:
-    opacity 0.18s var(--ease-out),
     transform 0.22s var(--ease-out),
     visibility 0s linear 0.22s;
 }
 .menu[data-open="true"] {
-  opacity: 1;
   visibility: visible;
   transform: none;
   pointer-events: auto;
@@ -390,4 +385,24 @@ input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
   }
+}
+
+.copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  border-radius: 0.5rem;
+  color: var(--muted);
+  transition:
+    color 0.2s var(--ease-out),
+    background-color 0.2s var(--ease-out);
+}
+.copy-btn:hover:not(:disabled) {
+  color: var(--text);
+  background: var(--soft);
+}
+.copy-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
