@@ -1,5 +1,6 @@
 import type { Post } from "@/lib/types";
-import { STATUS_META, TYPE_META } from "@/lib/types";
+import { STATUS_META } from "@/lib/types";
+import TypeIcon from "./TypeIcon";
 
 /** Final thumbnail -> inspo screenshot -> soft placeholder. */
 export default function PostThumb({
@@ -16,18 +17,18 @@ export default function PostThumb({
     <div className={`relative overflow-hidden bg-soft ${className}`}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" className="size-full object-cover" draggable={false} loading="lazy" />
+        <img src={src} alt="" className="fade-in size-full object-cover" draggable={false} loading="lazy" />
       ) : (
         <div
-          className="flex size-full items-center justify-center text-lg"
-          style={{ background: `color-mix(in srgb, ${STATUS_META[post.status].color} 16%, var(--soft))` }}
+          className="flex size-full items-center justify-center text-muted"
+          style={{ background: `color-mix(in srgb, ${STATUS_META[post.status].color} 7%, var(--soft))` }}
         >
-          {TYPE_META[post.post_type].icon}
+          <TypeIcon type={post.post_type} size={16} />
         </div>
       )}
       {showBadge && post.thumbnail_url && (
-        <span className="absolute right-1.5 top-1.5 rounded-full bg-black/55 px-1.5 py-0.5 text-[10px] leading-none text-white">
-          {TYPE_META[post.post_type].icon}
+        <span className="absolute right-1.5 top-1.5 rounded-md bg-black/60 p-1 text-white">
+          <TypeIcon type={post.post_type} size={12} />
         </span>
       )}
     </div>

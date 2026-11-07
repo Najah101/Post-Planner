@@ -5,18 +5,18 @@ export const POST_TYPES = ["reel", "photo", "carousel", "story"] as const;
 export type PostType = (typeof POST_TYPES)[number];
 
 export const STATUS_META: Record<Status, { label: string; color: string }> = {
-  idea: { label: "Idea", color: "#a78bfa" },
-  to_edit: { label: "To edit", color: "#f59e0b" },
-  editing: { label: "Editing", color: "#3b82f6" },
-  ready: { label: "Ready", color: "#10b981" },
-  posted: { label: "Posted", color: "#9ca3af" },
+  idea: { label: "Idea", color: "#8e908e" },
+  to_edit: { label: "To edit", color: "#fbde23" },
+  editing: { label: "Editing", color: "#e0716b" },
+  ready: { label: "Ready", color: "#e6e8e6" },
+  posted: { label: "Posted", color: "#5c5e5c" },
 };
 
-export const TYPE_META: Record<PostType, { label: string; icon: string }> = {
-  reel: { label: "Reel", icon: "🎬" },
-  photo: { label: "Photo", icon: "📷" },
-  carousel: { label: "Carousel", icon: "🗂️" },
-  story: { label: "Story", icon: "⭕" },
+export const TYPE_META: Record<PostType, { label: string }> = {
+  reel: { label: "Reel" },
+  photo: { label: "Photo" },
+  carousel: { label: "Carousel" },
+  story: { label: "Story" },
 };
 
 export interface Account {

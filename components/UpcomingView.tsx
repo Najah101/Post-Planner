@@ -2,9 +2,11 @@
 
 import { addDays, format, isToday, isTomorrow, startOfDay } from "date-fns";
 import type { Post } from "@/lib/types";
+import { Plus, Sparkles } from "lucide-react";
 import { TYPE_META } from "@/lib/types";
 import { usePlanner } from "./PlannerProvider";
 import PostThumb, { StatusChip } from "./PostThumb";
+import TypeIcon from "./TypeIcon";
 
 type Group = { label: string; posts: Post[]; tone?: "overdue" };
 
@@ -49,49 +51,46 @@ export default function UpcomingView() {
       <h1 className="mb-5 text-2xl font-semibold tracking-tight">Upcoming</h1>
 
       {groups.length === 0 && (
-        <div className="rounded-3xl border border-dashed border-line px-6 py-16 text-center">
-          <p className="text-4xl">🥐</p>
+        <div className="rise-in rounded-lg border border-dashed border-line px-6 py-16 text-center">
+          <Sparkles size={28} aria-hidden className="mx-auto text-hl" />
           <p className="mt-3 font-semibold">Nothing planned yet</p>
           <p className="mt-1 text-sm text-muted">Add your first post to start filling the calendar.</p>
-          <button
-            onClick={() => newPost()}
-            className="ig-gradient mt-5 rounded-full px-5 py-2 text-sm font-semibold text-white"
-          >
-            ＋ New post
+          <button onClick={() => newPost()} className="btn btn-primary mt-5">
+            <Plus size={16} aria-hidden /> New post
           </button>
         </div>
       )}
 
       <div className="space-y-8">
-        {groups.map((g) => (
-          <div key={g.label}>
+        {groups.map((g, gi) => (
+          <div key={g.label} className="rise-in" style={{ "--i": gi * 3 } as React.CSSProperties}>
             <h2
-              className={`mb-3 text-xs font-semibold uppercase tracking-wider ${
-                g.tone === "overdue" ? "text-red-500" : "text-muted"
+              className={`mb-3 text-[11px] font-semibold uppercase tracking-[0.06em] ${
+                g.tone === "overdue" ? "text-hl" : "text-muted"
               }`}
             >
               {g.label} · {g.posts.length}
             </h2>
             <ul className="space-y-3">
-              {g.posts.map((p) => (
-                <li key={p.id}>
+              {g.posts.map((p, i) => (
+                <li key={p.id} className="rise-in" style={{ "--i": gi * 3 + i + 1 } as React.CSSProperties}>
                   <button
                     onClick={() => openPost(p.id)}
-                    className="flex w-full gap-4 rounded-2xl border border-line bg-card p-3 text-left transition hover:border-accent"
+                    className="flex w-full gap-4 rounded-lg border border-line bg-card p-3 text-left transition-colors duration-200 hover:border-edge hover:bg-soft"
                   >
-                    <PostThumb post={p} showBadge className="aspect-[4/5] w-24 shrink-0 rounded-xl sm:w-28" />
+                    <PostThumb post={p} showBadge className="aspect-[4/5] w-24 shrink-0 rounded-md sm:w-28" />
                     <div className="flex min-w-0 flex-1 flex-col py-0.5">
                       <div className="mb-1.5 flex flex-wrap items-center gap-2">
                         <StatusChip status={p.status} />
-                        <span className="text-xs text-muted">
-                          {TYPE_META[p.post_type].icon} {TYPE_META[p.post_type].label}
+                        <span className="inline-flex items-center gap-1.5 text-xs text-muted">
+                          <TypeIcon type={p.post_type} /> {TYPE_META[p.post_type].label}
                         </span>
                       </div>
                       <h3 className="line-clamp-2 font-semibold leading-snug">{p.title}</h3>
                       {p.caption && <p className="mt-1 line-clamp-2 text-sm text-muted">{p.caption}</p>}
-                      <p className={`mt-auto pt-2 text-sm font-medium ${g.tone === "overdue" ? "text-red-500" : ""}`}>
+                      <p className={`mt-auto pt-2 text-sm font-medium ${g.tone === "overdue" ? "text-hl" : "text-ink2"}`}>
                         {p.planned_at
-                          ? format(new Date(p.planned_at), "EEE d MMM · h:mm a")
+                          ? format(new Date(p.planned_at), "EEE d MMM · HH:mm")
                           : "Pick a date"}
                       </p>
                     </div>

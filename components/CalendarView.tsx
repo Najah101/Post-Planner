@@ -25,6 +25,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import type { Post } from "@/lib/types";
 import { STATUS_META } from "@/lib/types";
 import { dayKey, moveToDay } from "@/lib/dates";
@@ -83,44 +84,44 @@ export default function CalendarView() {
   return (
     <section>
       <div className="mb-4 flex items-center gap-2">
-        <h1 className="mr-auto text-2xl font-semibold tracking-tight">{format(month, "MMMM yyyy")}</h1>
-        <button
-          onClick={() => setMonth(startOfMonth(new Date()))}
-          className="rounded-full border border-line px-3.5 py-1.5 text-sm font-medium hover:border-accent"
-        >
+        <h1 key={format(month, "yyyy-MM")} className="rise-in mr-auto text-2xl font-semibold tracking-tight">
+          {format(month, "MMMM yyyy")}
+        </h1>
+        <button onClick={() => setMonth(startOfMonth(new Date()))} className="btn btn-ghost">
           Today
         </button>
-        <div className="flex overflow-hidden rounded-full border border-line">
+        <div className="flex overflow-hidden rounded-lg border border-line">
           <button
             aria-label="Previous month"
             onClick={() => setMonth((m) => addMonths(m, -1))}
-            className="px-3.5 py-1.5 hover:bg-soft"
+            className="btn btn-quiet rounded-none px-2.5"
           >
-            ‹
+            <ChevronLeft size={18} aria-hidden />
           </button>
           <button
             aria-label="Next month"
             onClick={() => setMonth((m) => addMonths(m, 1))}
-            className="border-l border-line px-3.5 py-1.5 hover:bg-soft"
+            className="btn btn-quiet rounded-none border-l border-line px-2.5"
           >
-            ›
+            <ChevronRight size={18} aria-hidden />
           </button>
         </div>
       </div>
 
       <DndContext id="calendar-dnd" collisionDetection={pointerWithin} sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
-        <div className="overflow-hidden rounded-2xl border border-line bg-card">
+        <div className="overflow-hidden rounded-lg border border-line bg-card">
           <div className="grid grid-cols-7 border-b border-line bg-soft/60">
             {WEEKDAYS.map((d) => (
-              <div key={d} className="py-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted">
+              <div key={d} className="py-2 text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-muted">
                 {d}
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-7">
-            {days.map((day) => (
+          <div key={format(month, "yyyy-MM")} className="fade-in grid grid-cols-7">
+            {days.map((day, i) => (
               <DayCell
                 key={dayKey(day)}
+                index={i}
                 day={day}
                 inMonth={isSameMonth(day, month)}
                 posts={byDay.get(dayKey(day)) ?? []}
@@ -135,9 +136,9 @@ export default function CalendarView() {
           </div>
         </div>
 
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay dropAnimation={{ duration: 260, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }}>
           {dragging && (
-            <div className="w-40 rotate-2 rounded-lg border border-line bg-card p-1 shadow-xl">
+            <div className="w-40 scale-[1.03] rounded-lg border border-accent bg-soft p-1 shadow-[var(--shadow-drag)]">
               <Chip post={dragging} />
             </div>
           )}
@@ -150,14 +151,20 @@ export default function CalendarView() {
             No date yet <span className="font-normal text-muted">· {unscheduled.length}</span>
           </h2>
           <div className="flex gap-3 overflow-x-auto pb-2">
-            {unscheduled.map((p) => (
+            {unscheduled.map((p, i) => (
               <button
                 key={p.id}
                 onClick={() => openPost(p.id)}
-                className="w-28 shrink-0 text-left"
+                style={{ "--i": i } as React.CSSProperties}
+                className="rise-in group w-28 shrink-0 text-left"
               >
-                <PostThumb post={p} className="aspect-[4/5] rounded-xl border border-line" />
-                <p className="mt-1.5 truncate text-xs font-medium">{p.title}</p>
+                <PostThumb
+                  post={p}
+                  className="aspect-[4/5] rounded-lg border border-line transition-colors duration-200 group-hover:border-edge"
+                />
+                <p className="mt-1.5 truncate text-xs font-medium text-ink2 transition-colors group-hover:text-ink">
+                  {p.title}
+                </p>
               </button>
             ))}
           </div>
@@ -169,12 +176,14 @@ export default function CalendarView() {
 
 function DayCell({
   day,
+  index,
   inMonth,
   posts,
   onOpen,
   onAdd,
 }: {
   day: Date;
+  index: number;
   inMonth: boolean;
   posts: Post[];
   onOpen: (id: string) => void;
@@ -189,19 +198,24 @@ function DayCell({
     <div
       ref={setNodeRef}
       onClick={onAdd}
-      className={`group relative min-h-[84px] cursor-pointer border-b border-r border-line p-1 transition-colors md:min-h-[116px] md:p-1.5 [&:nth-child(7n)]:border-r-0 ${
-        inMonth ? "" : "bg-soft/50"
-      } ${isOver ? "bg-accent/10" : "hover:bg-soft/60"}`}
+      style={{ "--i": Math.min(index, 20) } as React.CSSProperties}
+      className={`rise-in group relative min-h-[84px] cursor-pointer border-b border-r border-line p-1 transition-[background-color,box-shadow] duration-200 md:min-h-[116px] md:p-1.5 [&:nth-child(7n)]:border-r-0 ${
+        inMonth ? "" : "bg-bg/60"
+      } ${isOver ? "bg-hl/10 shadow-[inset_0_0_0_1px_var(--hl-line)]" : "hover:bg-[var(--wash)]"}`}
     >
       <div className="mb-1 flex items-center justify-between">
         <span
           className={`flex size-6 items-center justify-center rounded-full text-xs font-medium ${
-            today ? "ig-gradient font-bold text-white" : inMonth ? "text-ink" : "text-muted/60"
+            today ? "today-dot bg-accent font-semibold text-white" : inMonth ? "text-ink" : "text-faint"
           }`}
         >
           {format(day, "d")}
         </span>
-        <span className="hidden text-sm text-muted opacity-0 transition group-hover:opacity-100 md:block">＋</span>
+        <Plus
+          size={14}
+          aria-hidden
+          className="hidden -translate-x-1 text-muted opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-0 group-hover:opacity-100 md:block"
+        />
       </div>
       <div className="flex flex-col gap-1">
         {shown.map((p) => (
@@ -224,7 +238,7 @@ function DraggableChip({ post, onOpen }: { post: Post; onOpen: (id: string) => v
         e.stopPropagation();
         onOpen(post.id);
       }}
-      className={`cursor-grab rounded-lg border border-line bg-card p-0.5 text-left transition hover:border-accent md:p-1 ${
+      className={`cursor-grab rounded-lg border border-line bg-soft p-0.5 text-left transition-[border-color,opacity,background-color] duration-200 hover:border-edge md:p-1 ${
         isDragging ? "opacity-30" : ""
       }`}
     >
@@ -239,7 +253,7 @@ function Chip({ post }: { post: Post }) {
       <div className="relative shrink-0">
         <PostThumb post={post} className="size-6 rounded-md text-[11px] md:size-7" />
         <span
-          className="absolute -right-0.5 -top-0.5 size-2 rounded-full ring-2 ring-card"
+          className="absolute -right-0.5 -top-0.5 size-2 rounded-full ring-2 ring-soft"
           style={{ background: STATUS_META[post.status].color }}
           title={STATUS_META[post.status].label}
         />
@@ -247,7 +261,7 @@ function Chip({ post }: { post: Post }) {
       <div className="hidden min-w-0 flex-1 md:block">
         <p className="truncate text-xs font-medium leading-tight">{post.title}</p>
         {post.planned_at && (
-          <p className="text-[10px] leading-tight text-muted">{format(new Date(post.planned_at), "h:mm a")}</p>
+          <p className="text-[10px] leading-tight text-muted">{format(new Date(post.planned_at), "HH:mm")}</p>
         )}
       </div>
     </div>

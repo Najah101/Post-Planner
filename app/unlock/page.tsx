@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CalendarDays } from "lucide-react";
 
 export default function UnlockPage() {
   const [code, setCode] = useState("");
@@ -28,12 +29,12 @@ export default function UnlockPage() {
     <main className="flex min-h-dvh items-center justify-center px-4">
       <form
         onSubmit={submit}
-        className="fade-in w-full max-w-sm rounded-3xl border border-line bg-card p-8 text-center shadow-sm"
+        className="sheet-in w-full max-w-sm rounded-lg border border-line bg-card p-8 text-center"
       >
-        <div className="ig-gradient mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl text-2xl">
-          🥐
+        <div className="mx-auto mb-5 flex size-12 items-center justify-center rounded-lg bg-accent text-white">
+          <CalendarDays size={22} aria-hidden />
         </div>
-        <h1 className="text-xl font-semibold">Post Planner</h1>
+        <h1 className="text-xl font-semibold tracking-tight">Post Planner</h1>
         <p className="mt-1 text-sm text-muted">Enter the passcode to continue</p>
         <input
           type="password"
@@ -44,10 +45,10 @@ export default function UnlockPage() {
           className="field mt-6 text-center"
           aria-invalid={error}
         />
-        {error && <p className="mt-2 text-sm text-red-500">That passcode isn’t right.</p>}
+        {error && <p className="mt-2 text-sm text-hl">That passcode isn’t right.</p>}
         <button
           disabled={busy || !code}
-          className="ig-gradient mt-4 w-full rounded-xl py-3 font-semibold text-white transition disabled:opacity-50"
+          className="btn btn-primary mt-4 !h-11 w-full"
         >
           {busy ? "Checking…" : "Unlock"}
         </button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
 import type { Account, Post, PostInput } from "@/lib/types";
 import {
   createAccountAction,
@@ -54,10 +54,14 @@ export default function PlannerProvider({
   const [posts, setPosts] = useState(initialPosts);
   const [drawer, setDrawer] = useState<DrawerState | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [leaving, setLeaving] = useState(false);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   const toast = useCallback((msg: string) => {
+    timers.current.forEach(clearTimeout);
+    setLeaving(false);
     setMessage(msg);
-    setTimeout(() => setMessage((m) => (m === msg ? null : m)), 3500);
+    timers.current = [setTimeout(() => setLeaving(true), 3200), setTimeout(() => setMessage(null), 3500)];
   }, []);
 
   const patchPost = useCallback(
@@ -151,7 +155,9 @@ export default function PlannerProvider({
       {message && (
         <div
           role="status"
-          className="fade-in fixed bottom-24 left-1/2 z-[60] -translate-x-1/2 rounded-full bg-ink px-4 py-2 text-sm text-bg shadow-lg md:bottom-6"
+          key={message}
+          data-closing={leaving}
+          className="toast-in fixed bottom-24 left-1/2 z-[60] -translate-x-1/2 rounded-lg border border-edge bg-soft px-4 py-2.5 text-sm text-ink shadow-[var(--shadow-overlay)] md:bottom-6"
         >
           {message}
         </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ExternalLink } from "lucide-react";
+import { useExit } from "@/lib/useExit";
 import type { Post, PostType, Status } from "@/lib/types";
 import { POST_TYPES, STATUSES, STATUS_META, TYPE_META } from "@/lib/types";
 import { fromLocalInput, toLocalInput } from "@/lib/dates";
@@ -10,7 +12,7 @@ import ImageField from "./ImageField";
 export default function PostDrawer({
   post,
   defaults,
-  onClose,
+  onClose: finish,
 }: {
   post?: Post;
   defaults: Partial<Post>;
@@ -32,6 +34,7 @@ export default function PostDrawer({
   const [thumb, setThumb] = useState(base.thumbnail_url ?? "");
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const { closing, close: onClose } = useExit(finish, 240);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -81,18 +84,22 @@ export default function PostDrawer({
       <button
         aria-label="Close"
         onClick={onClose}
-        className="fade-in absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+        className="scrim absolute inset-0"
+      data-closing={closing}
       />
-      <div className="sheet-in relative flex h-dvh w-full flex-col bg-card shadow-2xl md:max-w-xl md:border-l md:border-line">
+      <div
+        data-closing={closing}
+        className="drawer-in relative flex h-dvh w-full flex-col bg-card shadow-[var(--shadow-overlay)] md:max-w-xl md:border-l md:border-line"
+      >
         <header className="flex items-center justify-between border-b border-line px-5 py-3">
-          <button onClick={onClose} className="-ml-2 rounded-lg px-2 py-1.5 text-sm text-muted hover:text-ink">
+          <button onClick={onClose} className="btn btn-quiet -ml-2">
             Cancel
           </button>
           <h2 className="text-sm font-semibold">{post ? "Edit post" : "New post"}</h2>
           <button
             onClick={save}
             disabled={saving}
-            className="ig-gradient rounded-full px-4 py-1.5 text-sm font-semibold text-white disabled:opacity-60"
+            className="btn btn-primary"
           >
             {saving ? "Saving…" : "Save"}
           </button>
@@ -123,13 +130,21 @@ export default function PostDrawer({
                     type="button"
                     onClick={() => setStatus(s)}
                     aria-pressed={on}
-                    className="rounded-full border px-3.5 py-1.5 text-sm font-medium transition"
+                    className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-[background-color,border-color,color] duration-200 hover:border-edge"
                     style={
                       on
-                        ? { background: c, borderColor: c, color: "#fff" }
+                        ? {
+                            background: `color-mix(in srgb, ${c} 14%, transparent)`,
+                            borderColor: `color-mix(in srgb, ${c} 55%, transparent)`,
+                            color: c,
+                          }
                         : { borderColor: "var(--line)", color: "var(--muted)" }
                     }
                   >
+                    <span
+                      className="size-1.5 rounded-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      style={{ background: c, transform: on ? "scale(1.4)" : "scale(1)" }}
+                    />
                     {STATUS_META[s].label}
                   </button>
                 );
@@ -158,14 +173,14 @@ export default function PostDrawer({
               >
                 {POST_TYPES.map((t) => (
                   <option key={t} value={t}>
-                    {TYPE_META[t].icon} {TYPE_META[t].label}
+                    {TYPE_META[t].label}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          <section className="rounded-2xl border border-line p-4">
+          <section className="rounded-lg border border-line p-4">
             <h3 className="mb-3 text-sm font-semibold">Inspiration</h3>
             <div className="flex flex-col gap-4 sm:flex-row">
               <ImageField
@@ -190,9 +205,9 @@ export default function PostDrawer({
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-line px-3.5 py-1.5 text-sm font-medium hover:border-accent"
+                    className="btn btn-ghost mt-3 no-underline"
                   >
-                    Open inspo ↗
+                    Open inspo <ExternalLink size={14} aria-hidden />
                   </a>
                 )}
               </div>
@@ -215,7 +230,7 @@ export default function PostDrawer({
                 type="button"
                 onClick={copyCaption}
                 disabled={!caption && !hashtags}
-                className="text-xs font-semibold text-accent disabled:opacity-40"
+                className="text-xs font-semibold text-hl transition-opacity duration-200 hover:opacity-80 disabled:opacity-40"
               >
                 Copy caption + hashtags
               </button>
@@ -231,7 +246,7 @@ export default function PostDrawer({
             <textarea
               aria-label="Hashtags"
               rows={2}
-              className="field mt-2 resize-y"
+              className="field mt-2 resize-y font-mono text-[13px]"
               placeholder="#bakery #freshbread …"
               value={hashtags}
               onChange={(e) => setHashtags(e.target.value)}
@@ -264,23 +279,23 @@ export default function PostDrawer({
           {post && (
             <div className="border-t border-line pt-4">
               {confirmDelete ? (
-                <div className="flex items-center gap-3">
+                <div className="fade-in flex items-center gap-3">
                   <span className="text-sm">Delete this post for good?</span>
                   <button
                     onClick={async () => {
                       await removePost(post.id);
                       onClose();
                     }}
-                    className="rounded-full bg-red-500 px-4 py-1.5 text-sm font-semibold text-white"
+                    className="btn btn-primary"
                   >
                     Yes, delete
                   </button>
-                  <button onClick={() => setConfirmDelete(false)} className="text-sm text-muted">
+                  <button onClick={() => setConfirmDelete(false)} className="btn btn-quiet">
                     Keep
                   </button>
                 </div>
               ) : (
-                <button onClick={() => setConfirmDelete(true)} className="text-sm font-medium text-red-500">
+                <button onClick={() => setConfirmDelete(true)} className="btn btn-quiet -ml-3.5 !text-danger">
                   Delete post
                 </button>
               )}
