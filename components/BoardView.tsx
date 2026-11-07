@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   DndContext,
+  pointerWithin,
   DragOverlay,
   MouseSensor,
   TouchSensor,
@@ -41,6 +42,7 @@ export default function BoardView() {
       <h1 className="mb-4 text-2xl font-semibold tracking-tight">Board</h1>
       <DndContext
         id="board-dnd"
+        collisionDetection={pointerWithin}
         sensors={sensors}
         onDragStart={(e) => setDragging(posts.find((p) => p.id === e.active.id) ?? null)}
         onDragEnd={onDragEnd}

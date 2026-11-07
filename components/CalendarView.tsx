@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   DndContext,
+  pointerWithin,
   DragOverlay,
   MouseSensor,
   TouchSensor,
@@ -107,7 +108,7 @@ export default function CalendarView() {
         </div>
       </div>
 
-      <DndContext id="calendar-dnd" sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
+      <DndContext id="calendar-dnd" collisionDetection={pointerWithin} sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd} onDragCancel={() => setDragging(null)}>
         <div className="overflow-hidden rounded-2xl border border-line bg-card">
           <div className="grid grid-cols-7 border-b border-line bg-soft/60">
             {WEEKDAYS.map((d) => (
