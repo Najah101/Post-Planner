@@ -347,20 +347,28 @@ input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
 }
 
 /* Menu: stays mounted so it can transition both ways */
+/* Closed: wipes up into its trigger (clip) while lifting slightly — no fade, no pop.
+   Insets are padded by 24px so the open state never clips the overlay shadow. */
 .menu {
   visibility: hidden;
-  transform: scale(0.96) translateY(-4px);
+  transform: translateY(-6px) scale(0.98);
   transform-origin: top left;
+  clip-path: inset(-24px -24px calc(100% + 24px) -24px);
   pointer-events: none;
   transition:
-    transform 0.22s var(--ease-out),
-    visibility 0s linear 0.22s;
+    clip-path 0.2s cubic-bezier(0.4, 0, 1, 1),
+    transform 0.2s cubic-bezier(0.4, 0, 1, 1),
+    visibility 0s linear 0.2s;
 }
 .menu[data-open="true"] {
   visibility: visible;
   transform: none;
+  clip-path: inset(-24px -24px -24px -24px);
   pointer-events: auto;
-  transition-delay: 0s;
+  transition:
+    clip-path 0.28s var(--ease-out),
+    transform 0.28s var(--ease-out),
+    visibility 0s;
 }
 
 ::-webkit-scrollbar {
