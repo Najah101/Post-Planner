@@ -28,7 +28,7 @@ import {
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import type { Post } from "@/lib/types";
 import { STATUS_META } from "@/lib/types";
-import { dayKey, moveToDay } from "@/lib/dates";
+import { dayKey, moveToDay, toWallIso, wall } from "@/lib/dates";
 import { usePlanner } from "./PlannerProvider";
 import PostThumb from "./PostThumb";
 
@@ -58,7 +58,7 @@ export default function CalendarView() {
     const map = new Map<string, Post[]>();
     for (const p of posts) {
       if (!p.planned_at) continue;
-      const k = dayKey(new Date(p.planned_at));
+      const k = dayKey(wall(p.planned_at));
       map.set(k, [...(map.get(k) ?? []), p]);
     }
     for (const list of map.values()) list.sort((a, b) => a.planned_at!.localeCompare(b.planned_at!));
@@ -77,7 +77,7 @@ export default function CalendarView() {
     const over = e.over?.id;
     if (!post || typeof over !== "string" || !over.startsWith("day:")) return;
     const day = new Date(`${over.slice(4)}T12:00:00`);
-    if (post.planned_at && dayKey(new Date(post.planned_at)) === over.slice(4)) return;
+    if (post.planned_at && dayKey(wall(post.planned_at)) === over.slice(4)) return;
     patchPost(post.id, { planned_at: moveToDay(post.planned_at, day) });
   }
 
@@ -132,7 +132,7 @@ export default function CalendarView() {
                 onAdd={() => {
                   const d = new Date(day);
                   d.setHours(12, 0, 0, 0);
-                  newPost({ planned_at: d.toISOString() });
+                  newPost({ planned_at: toWallIso(d) });
                 }}
               />
             ))}
@@ -260,7 +260,7 @@ function Chip({ post }: { post: Post }) {
       <div className="hidden min-w-0 flex-1 md:block">
         <p className="truncate text-xs font-medium leading-tight">{post.title}</p>
         {post.planned_at && (
-          <p className="text-[10px] leading-tight text-muted">{format(new Date(post.planned_at), "HH:mm")}</p>
+          <p className="text-[10px] leading-tight text-muted">{format(wall(post.planned_at), "h:mm a")}</p>
         )}
       </div>
     </div>

@@ -32,7 +32,7 @@ export interface Post {
   title: string;
   status: Status;
   post_type: PostType;
-  planned_at: string | null; // ISO, UTC
+  planned_at: string | null; // ISO; UTC fields hold the wall-clock time (see lib/dates.ts)
   caption: string;
   hashtags: string;
   audio_note: string;

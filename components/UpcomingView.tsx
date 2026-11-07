@@ -1,6 +1,7 @@
 "use client";
 
 import { addDays, format, isToday, isTomorrow, startOfDay } from "date-fns";
+import { wall } from "@/lib/dates";
 import type { Post } from "@/lib/types";
 import { Plus, Sparkles } from "lucide-react";
 import { TYPE_META } from "@/lib/types";
@@ -24,7 +25,7 @@ function groupPosts(posts: Post[]): Group[] {
   const week: Post[] = [];
   const later: Post[] = [];
   for (const p of dated) {
-    const d = new Date(p.planned_at!);
+    const d = wall(p.planned_at!);
     if (d < todayStart) overdue.push(p);
     else if (isToday(d)) today.push(p);
     else if (isTomorrow(d)) tomorrow.push(p);
@@ -90,7 +91,7 @@ export default function UpcomingView() {
                       {p.caption && <p className="mt-1 line-clamp-2 text-sm text-muted">{p.caption}</p>}
                       <p className={`mt-auto pt-2 text-sm font-medium ${g.tone === "overdue" ? "text-hl" : "text-ink2"}`}>
                         {p.planned_at
-                          ? format(new Date(p.planned_at), "EEE d MMM · HH:mm")
+                          ? format(wall(p.planned_at), "EEE d MMM · h:mm a")
                           : "Pick a date"}
                       </p>
                     </div>

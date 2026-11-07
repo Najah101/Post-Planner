@@ -13,6 +13,8 @@ let lastIndex = -1;
 export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [dir] = useState(() => {
+    // Server renders never slide (module state there is shared across requests).
+    if (typeof window === "undefined") return 0;
     const next = indexOf(pathname);
     const d = lastIndex === -1 || next === -1 || next === lastIndex ? 0 : next > lastIndex ? 1 : -1;
     lastIndex = next;
