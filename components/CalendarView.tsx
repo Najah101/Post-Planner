@@ -227,7 +227,6 @@ function DraggableChip({ post, onOpen }: { post: Post; onOpen: (id: string) => v
       className={`cursor-grab rounded-lg border border-line bg-card p-0.5 text-left transition hover:border-accent md:p-1 ${
         isDragging ? "opacity-30" : ""
       }`}
-      style={{ borderLeft: `3px solid ${STATUS_META[post.status].color}` }}
     >
       <Chip post={post} />
     </div>
@@ -237,7 +236,14 @@ function DraggableChip({ post, onOpen }: { post: Post; onOpen: (id: string) => v
 function Chip({ post }: { post: Post }) {
   return (
     <div className="flex items-center gap-1.5">
-      <PostThumb post={post} className="size-6 shrink-0 rounded-md text-[11px] md:size-7" />
+      <div className="relative shrink-0">
+        <PostThumb post={post} className="size-6 rounded-md text-[11px] md:size-7" />
+        <span
+          className="absolute -right-0.5 -top-0.5 size-2 rounded-full ring-2 ring-card"
+          style={{ background: STATUS_META[post.status].color }}
+          title={STATUS_META[post.status].label}
+        />
+      </div>
       <div className="hidden min-w-0 flex-1 md:block">
         <p className="truncate text-xs font-medium leading-tight">{post.title}</p>
         {post.planned_at && (
