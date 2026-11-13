@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Account, Post, PostInput } from "./types";
 
 /**
@@ -130,8 +130,7 @@ const localStore: Store = {
 
 const BUCKET = "post-images";
 
-function supabaseStore(url: string, key: string): Store {
-  const db = createClient(url, key, { auth: { persistSession: false } });
+function supabaseStore(db: SupabaseClient): Store {
   const check = <T,>(res: { data: T | null; error: { message: string } | null }): T => {
     if (res.error) throw new Error(res.error.message);
     return res.data as T;
@@ -189,15 +188,16 @@ function supabaseStore(url: string, key: string): Store {
 
 /* -------------------------------- export -------------------------------- */
 
-const g = globalThis as unknown as { __store?: Store };
+// Only the client is cached (it holds the connection). The store object is rebuilt per call so
+// hot reload in dev always picks up its current methods.
+const g = globalThis as unknown as { __supabase?: SupabaseClient };
 
 export function getStore(): Store {
-  if (!g.__store) {
-    const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    g.__store = url && key ? supabaseStore(url, key) : localStore;
-  }
-  return g.__store;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return localStore;
+  g.__supabase ??= createClient(url, key, { auth: { persistSession: false } });
+  return supabaseStore(g.__supabase);
 }
 
 /** Make sure at least one account exists (the bakery) and return all accounts. */
