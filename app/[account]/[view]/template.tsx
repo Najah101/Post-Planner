@@ -6,7 +6,8 @@ import { usePathname } from "next/navigation";
 const ORDER = ["calendar", "board", "upcoming"];
 const indexOf = (path: string) => ORDER.indexOf(path.split("/").pop() ?? "");
 
-// The template re-mounts on every navigation, so remember the previous view here.
+// Lives in the [view] segment: a template only remounts when its own segment changes,
+// so one level up it would never remount on a view switch. Remember the previous view here.
 let lastIndex = -1;
 
 /** Views slide in from the side they sit on in the tab bar. */
