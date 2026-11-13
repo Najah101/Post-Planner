@@ -38,7 +38,13 @@ export default function DateTimePicker({
   }, [value]);
 
   const [open, setOpen] = useState(false);
-  const [month, setMonth] = useState(() => startOfMonth(selected ?? new Date()));
+  const [month, setMonthState] = useState(() => startOfMonth(selected ?? new Date()));
+  const [dir, setDir] = useState(0);
+  // Months slide in from the side they come from, same as the main calendar.
+  const setMonth = (next: Date) => {
+    setDir(Math.sign(next.getTime() - month.getTime()));
+    setMonthState(next);
+  };
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,7 +86,10 @@ export default function DateTimePicker({
   }
 
   function toggle() {
-    if (!open) setMonth(startOfMonth(selected ?? new Date()));
+    if (!open) {
+      setMonthState(startOfMonth(selected ?? new Date()));
+      setDir(0);
+    }
     setOpen((o) => !o);
   }
 
@@ -127,12 +136,20 @@ export default function DateTimePicker({
         className="menu absolute left-0 top-full z-20 mt-2 w-[19rem] max-w-[calc(100vw-2.5rem)] rounded-lg border border-line bg-card p-3 shadow-[var(--shadow-overlay)]"
       >
         <div className="mb-2 flex items-center gap-1">
-          <span className="mr-auto pl-1 text-sm font-semibold">{format(month, "MMMM yyyy")}</span>
+          <span className="mr-auto overflow-hidden pl-1 text-sm font-semibold">
+            <span
+              key={format(month, "yyyy-MM")}
+              className={`block ${dir ? "slide-x" : ""}`}
+              style={{ "--dir": dir } as React.CSSProperties}
+            >
+              {format(month, "MMMM yyyy")}
+            </span>
+          </span>
           <button
             type="button"
             tabIndex={open ? 0 : -1}
             aria-label="Previous month"
-            onClick={() => setMonth((m) => addMonths(m, -1))}
+            onClick={() => setMonth(addMonths(month, -1))}
             className="copy-btn"
           >
             <ChevronLeft size={16} aria-hidden />
@@ -141,7 +158,7 @@ export default function DateTimePicker({
             type="button"
             tabIndex={open ? 0 : -1}
             aria-label="Next month"
-            onClick={() => setMonth((m) => addMonths(m, 1))}
+            onClick={() => setMonth(addMonths(month, 1))}
             className="copy-btn"
           >
             <ChevronRight size={16} aria-hidden />
@@ -154,6 +171,13 @@ export default function DateTimePicker({
               {d}
             </span>
           ))}
+        </div>
+        <div className="overflow-hidden">
+          <div
+            key={format(month, "yyyy-MM")}
+            className={`grid grid-cols-7 text-center ${dir ? "slide-x" : ""}`}
+            style={{ "--dir": dir } as React.CSSProperties}
+          >
           {days.map((day) => {
             const on = selected ? isSameDay(day, selected) : false;
             return (
@@ -164,10 +188,10 @@ export default function DateTimePicker({
                 onClick={() => commit(day)}
                 aria-pressed={on}
                 aria-label={format(day, "EEEE d MMMM")}
-                className={`mx-auto my-0.5 flex size-9 items-center justify-center rounded-full text-sm transition-colors duration-150 ${
+                className={`tap mx-auto my-0.5 flex size-9 items-center justify-center rounded-full text-sm ${
                   on
                     ? "bg-accent font-semibold text-white"
-                    : `hover:bg-soft ${isSameMonth(day, month) ? "text-ink" : "text-faint"} ${
+                    : `hover:bg-wash ${isSameMonth(day, month) ? "text-ink" : "text-faint"} ${
                         isToday(day) ? "font-semibold ring-1 ring-inset ring-edge" : ""
                       }`
                 }`}
@@ -176,6 +200,7 @@ export default function DateTimePicker({
               </button>
             );
           })}
+          </div>
         </div>
 
         <div className="mt-3 border-t border-line pt-3">
@@ -209,7 +234,7 @@ export default function DateTimePicker({
                     tabIndex={open ? 0 : -1}
                     aria-pressed={on}
                     onClick={() => commit(selected ?? new Date(), (hour % 12) + (p === "PM" ? 12 : 0), minute)}
-                    className={`px-2.5 py-1.5 text-xs font-semibold transition-colors duration-150 ${
+                    className={`tap px-2.5 py-1.5 text-xs font-semibold ${
                       on ? "bg-soft text-ink" : "text-muted hover:text-ink"
                     }`}
                   >
@@ -231,7 +256,7 @@ export default function DateTimePicker({
                     const [h, m] = t.split(":").map(Number);
                     commit(selected ?? new Date(), h, m);
                   }}
-                  className={`rounded-full border px-2.5 py-1 text-xs font-medium transition-colors duration-150 ${
+                  className={`tap rounded-full border px-2.5 py-1 text-xs font-medium ${
                     on ? "border-[var(--hl-line)] bg-[var(--hl-soft)] text-hl" : "border-line text-muted hover:border-edge hover:text-ink"
                   }`}
                 >
@@ -303,7 +328,7 @@ function NumBox({
       aria-label={label}
       inputMode="numeric"
       tabIndex={tabIndex}
-      className="field !w-16 !px-0 !py-1.5 text-center !text-sm"
+      className="field !w-14 !px-0 !py-1 text-center"
       value={shown}
       onFocus={(e) => e.target.select()}
       onChange={(e) => setDraft(e.target.value.replace(/\D/g, "").slice(0, 2))}

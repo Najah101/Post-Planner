@@ -77,7 +77,7 @@ export default function UpcomingView() {
                 <li key={p.id}>
                   <button
                     onClick={() => openPost(p.id)}
-                    className="flex w-full gap-4 rounded-lg border border-line bg-card p-3 text-left transition-colors duration-200 hover:border-edge hover:bg-soft"
+                    className="tap tap-surface flex w-full gap-3 rounded-lg border border-line bg-card p-3 text-left hover:border-edge hover:bg-soft sm:gap-4"
                   >
                     <PostThumb post={p} showBadge className="aspect-[4/5] w-24 shrink-0 rounded-md sm:w-28" />
                     <div className="flex min-w-0 flex-1 flex-col py-0.5">

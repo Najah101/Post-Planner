@@ -17,7 +17,7 @@ export default function PostThumb({
     <div className={`relative overflow-hidden bg-soft ${className}`}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" className="fade-in size-full object-cover" draggable={false} loading="lazy" />
+        <img src={src} alt="" className="size-full object-cover" draggable={false} loading="lazy" />
       ) : (
         <div
           className="flex size-full items-center justify-center text-muted"

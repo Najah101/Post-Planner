@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { DUR_EXIT } from "./motion";
 
-/** Plays an exit animation (data-closing="true") before calling onClose. */
-export function useExit(onClose: () => void, ms = 220) {
+/** Plays the shared exit animation (data-closing="true") before calling onClose. */
+export function useExit(onClose: () => void) {
   const [closing, setClosing] = useState(false);
   const done = useRef(false);
 
@@ -11,8 +12,8 @@ export function useExit(onClose: () => void, ms = 220) {
     if (done.current) return;
     done.current = true;
     setClosing(true);
-    setTimeout(onClose, ms);
-  }, [onClose, ms]);
+    setTimeout(onClose, DUR_EXIT);
+  }, [onClose]);
 
   return { closing, close };
 }

@@ -30,7 +30,7 @@ export default function UnlockPage({ searchParams }: { searchParams: Promise<{ e
     <main className="flex min-h-dvh items-center justify-center px-4">
       <form
         onSubmit={submit}
-        className="sheet-in w-full max-w-sm rounded-lg border border-line bg-card p-8 text-center"
+        className="reveal w-full max-w-sm rounded-lg border border-line bg-card p-8 text-center"
       >
         <div className="mx-auto mb-5 flex size-12 items-center justify-center rounded-lg bg-accent text-white">
           <CalendarDays size={22} aria-hidden />
@@ -50,7 +50,7 @@ export default function UnlockPage({ searchParams }: { searchParams: Promise<{ e
           className="field mt-6 text-center"
           aria-invalid={error}
         />
-        {error && <p className="mt-2 text-sm text-hl">That passcode isn’t right.</p>}
+        {error && <p className="reveal mt-2 text-sm text-hl">That passcode isn’t right.</p>}
         <button
           disabled={busy || !code}
           className="btn btn-primary mt-4 !h-11 w-full"

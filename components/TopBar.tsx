@@ -31,7 +31,7 @@ export default function TopBar() {
           >
             <span
               aria-hidden
-              className="absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-md bg-soft transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+              className="t-move absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-md bg-soft transition-transform"
               style={{ transform: `translateX(${index * 100}%)` }}
             />
             {VIEWS.map((v) => (
@@ -39,7 +39,7 @@ export default function TopBar() {
                 key={v.slug}
                 href={`/${account.id}/${v.slug}`}
                 aria-current={v.slug === current ? "page" : undefined}
-                className={`relative z-10 flex w-28 items-center justify-center gap-1.5 rounded-md py-1.5 text-sm font-medium no-underline transition-colors duration-200 ${
+                className={`tap relative z-10 flex w-28 items-center justify-center gap-1.5 rounded-md py-1.5 text-sm font-medium no-underline ${
                   v.slug === current ? "text-ink" : "text-muted hover:text-ink"
                 }`}
               >
@@ -58,21 +58,22 @@ export default function TopBar() {
         aria-label="Views"
         className="fixed inset-x-0 bottom-0 z-30 flex border-t border-line bg-bg pb-[env(safe-area-inset-bottom)] md:hidden"
       >
+        <span
+          aria-hidden
+          className="t-move absolute left-0 top-0 flex h-0.5 w-1/3 justify-center transition-transform"
+          style={{ transform: `translateX(${index * 100}%)` }}
+        >
+          <span className="h-full w-12 rounded-full bg-accent" />
+        </span>
         {VIEWS.map((v) => (
           <Link
             key={v.slug}
             href={`/${account.id}/${v.slug}`}
             aria-current={v.slug === current ? "page" : undefined}
-            className={`relative flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium no-underline transition-colors duration-200 ${
+            className={`tap flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium no-underline ${
               v.slug === current ? "text-ink" : "text-muted"
             }`}
           >
-            <span
-              aria-hidden
-              className={`absolute inset-x-6 top-0 h-0.5 rounded-full bg-accent transition-opacity duration-300 ${
-                v.slug === current ? "opacity-100" : "opacity-0"
-              }`}
-            />
             <v.Icon size={20} strokeWidth={2} aria-hidden />
             {v.label}
           </Link>
@@ -114,22 +115,22 @@ function AccountSwitcher({ view }: { view: string }) {
   }
 
   const item =
-    "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors duration-150 hover:bg-soft";
+    "tap tap-surface flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-wash active:bg-[var(--wash-press)]";
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative min-w-0" ref={ref}>
       <button
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={open}
-        className="flex items-center gap-2 rounded-lg border border-line bg-card py-1 pl-1 pr-2.5 transition-colors duration-200 hover:border-edge hover:bg-soft"
+        className="tap tap-surface flex min-w-0 items-center gap-2 rounded-lg border border-line bg-card py-1 pl-1 pr-2.5 hover:border-edge hover:bg-soft"
       >
         <span className="flex size-8 items-center justify-center rounded-md bg-soft text-base">{account.emoji}</span>
         <span className="max-w-[9rem] truncate text-sm font-semibold">{account.name}</span>
         <ChevronDown
           size={14}
           aria-hidden
-          className={`text-muted transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`t-move shrink-0 text-muted transition-transform ${
             open ? "rotate-180" : ""
           }`}
         />
@@ -139,7 +140,7 @@ function AccountSwitcher({ view }: { view: string }) {
         role="menu"
         data-open={open}
         aria-hidden={!open}
-        className="menu absolute left-0 top-12 z-40 w-64 rounded-lg border border-line bg-card p-1.5 shadow-[var(--shadow-overlay)]"
+        className="menu absolute left-0 top-12 z-40 w-64 max-w-[calc(100vw-2rem)] rounded-lg border border-line bg-card p-1.5 shadow-[var(--shadow-overlay)]"
       >
         {accounts.map((a) => (
           <button
@@ -251,7 +252,7 @@ function AccountDialog({
           await onSubmit(name.trim(), emoji.trim() || "📸");
         }}
         data-closing={closing}
-        className="sheet-in relative w-full max-w-sm rounded-lg border border-line bg-card p-6 shadow-[var(--shadow-overlay)]"
+        className="reveal relative w-full max-w-sm rounded-lg border border-line bg-card p-6 shadow-[var(--shadow-overlay)]"
       >
         <h2 className="text-xl font-semibold tracking-tight">{mode === "add" ? "Add an account" : "Rename account"}</h2>
         <div className="mt-4 flex gap-3">
@@ -330,7 +331,7 @@ function ShareDialog({
       <button aria-label="Close" onClick={close} data-closing={closing} className="scrim absolute inset-0" />
       <div
         data-closing={closing}
-        className="sheet-in relative w-full max-w-md rounded-lg border border-line bg-card p-6 shadow-[var(--shadow-overlay)]"
+        className="reveal relative w-full max-w-md rounded-lg border border-line bg-card p-6 shadow-[var(--shadow-overlay)]"
       >
         <h2 className="text-xl font-semibold tracking-tight">Share {accountName}</h2>
         <p className="mt-1 text-sm text-muted">
@@ -340,7 +341,7 @@ function ShareDialog({
           <input
             readOnly
             aria-label="Share link"
-            className="field min-w-0 flex-1 text-sm"
+            className="field min-w-0 flex-1"
             value={link || "Creating link…"}
             onFocus={(e) => e.target.select()}
           />
@@ -348,8 +349,12 @@ function ShareDialog({
             type="button"
             disabled={!link}
             onClick={async () => {
-              await navigator.clipboard.writeText(link);
-              toast("Link copied.");
+              try {
+                await navigator.clipboard.writeText(link);
+                toast("Link copied.");
+              } catch {
+                toast("Couldn’t copy. Select the link instead.");
+              }
             }}
             className="btn btn-primary"
           >
@@ -358,13 +363,13 @@ function ShareDialog({
         </div>
         <div className="mt-6 flex items-center justify-between gap-2">
           {confirmReset ? (
-            <p className="text-sm text-ink2">The old link will stop working.</p>
+            <p key="warn" className="reveal text-sm text-ink2">The old link will stop working.</p>
           ) : (
             <button type="button" disabled={!link} onClick={() => setConfirmReset(true)} className="btn btn-quiet">
               <RotateCcw size={15} aria-hidden /> Reset link
             </button>
           )}
-          <div className="flex gap-2">
+          <div key={String(confirmReset)} className={`flex gap-2 ${confirmReset ? "reveal" : ""}`}>
             {confirmReset ? (
               <>
                 <button type="button" onClick={() => setConfirmReset(false)} className="btn btn-quiet">

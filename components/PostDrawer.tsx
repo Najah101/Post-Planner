@@ -35,7 +35,7 @@ export default function PostDrawer({
   const [thumb, setThumb] = useState(base.thumbnail_url ?? "");
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const { closing, close: onClose } = useExit(finish, 240);
+  const { closing, close: onClose } = useExit(finish);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -86,11 +86,11 @@ export default function PostDrawer({
         aria-label="Close"
         onClick={onClose}
         className="scrim absolute inset-0"
-      data-closing={closing}
+        data-closing={closing}
       />
       <div
         data-closing={closing}
-        className="drawer-in relative flex h-dvh w-full flex-col bg-card shadow-[var(--shadow-overlay)] md:max-w-xl md:border-l md:border-line"
+        className="panel relative flex h-dvh w-full flex-col bg-card shadow-[var(--shadow-overlay)] md:max-w-xl md:border-l md:border-line"
       >
         <header className="flex items-center justify-between border-b border-line px-5 py-3">
           <button onClick={onClose} className="btn btn-quiet -ml-2">
@@ -131,7 +131,7 @@ export default function PostDrawer({
                     type="button"
                     onClick={() => setStatus(s)}
                     aria-pressed={on}
-                    className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-[background-color,border-color,color] duration-200 hover:border-edge"
+                    className="tap inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium hover:border-edge"
                     style={
                       on
                         ? {
@@ -143,7 +143,7 @@ export default function PostDrawer({
                     }
                   >
                     <span
-                      className="size-1.5 rounded-full transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      className="t-move size-1.5 rounded-full transition-transform"
                       style={{ background: c, transform: on ? "scale(1.4)" : "scale(1)" }}
                     />
                     {STATUS_META[s].label}
@@ -255,7 +255,7 @@ export default function PostDrawer({
               <textarea
                 aria-label="Hashtags"
                 rows={2}
-                className="field resize-y pr-10 font-mono text-[13px]"
+                className="field resize-y pr-10 font-mono"
                 placeholder="#bakery #freshbread …"
                 value={hashtags}
                 onChange={(e) => setHashtags(e.target.value)}
@@ -299,7 +299,7 @@ export default function PostDrawer({
           {post && (
             <div className="border-t border-line pt-4">
               {confirmDelete ? (
-                <div className="fade-in flex items-center gap-3">
+                <div className="reveal flex flex-wrap items-center gap-3">
                   <span className="text-sm">Delete this post for good?</span>
                   <button
                     onClick={async () => {

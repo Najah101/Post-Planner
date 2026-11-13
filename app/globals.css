@@ -34,15 +34,25 @@
   --hl: var(--candlelight);
   --hl-soft: rgba(251, 222, 35, 0.1);
   --hl-line: rgba(251, 222, 35, 0.45);
-  --wash: rgba(230, 232, 230, 0.04);
-  --wash-press: rgba(230, 232, 230, 0.08);
+  --wash: rgba(230, 232, 230, 0.05);
+  --wash-press: rgba(230, 232, 230, 0.09);
 
   --radius: 8px;
   --scrim: rgba(10, 10, 10, 0.72);
   --shadow-overlay: 0 8px 24px rgba(0, 0, 0, 0.48), 0 0 0 1px var(--line-gray);
   --shadow-drag: 0 12px 24px rgba(0, 0, 0, 0.5);
 
+  /* ---------- Motion ----------
+     Every animation in the app is built from these. lib/motion.ts mirrors them for JS.
+     Arriving/moving things ease out; leaving things ease in and are quicker. */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --dur-tap: 120ms; /* hover, press, colour changes */
+  --dur-move: 240ms; /* popovers, dialogs, toasts, indicators */
+  --dur-panel: 380ms; /* drawer, view and month slides */
+  --dur-exit: 180ms; /* anything closing */
+  --slide: 32px; /* how far content slides when the view or month changes */
+  --tap-scale: 0.96; /* press depth for controls; rows and cards use .tap-surface */
 }
 
 @theme inline {
@@ -55,6 +65,7 @@
   --color-muted: var(--muted);
   --color-faint: var(--faint);
   --color-soft: var(--soft);
+  --color-wash: var(--wash);
   --color-accent: var(--accent);
   --color-accent-hover: var(--mexican-red-hover);
   --color-accent-press: var(--mexican-red-press);
@@ -62,6 +73,15 @@
   --color-danger: var(--red-text);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
+  /* Bare `transition-*` utilities use the tap timing. */
+  --default-transition-duration: var(--dur-tap);
+  --default-transition-timing-function: var(--ease-out);
+}
+
+/* Movement timing for transitions (indicators, chevrons, reveal-on-hover). */
+@utility t-move {
+  transition-duration: var(--dur-move);
+  transition-timing-function: var(--ease-out);
 }
 
 html,
@@ -75,6 +95,7 @@ body {
   font-feature-settings: "cv11", "ss01", "tnum";
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
 }
 
 :focus-visible {
@@ -86,191 +107,302 @@ body {
   color: var(--candlelight-ink);
 }
 
-/* ---------- Controls ---------- */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: var(--radius);
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition:
-    background-color 0.2s var(--ease-out),
-    border-color 0.2s var(--ease-out),
-    color 0.2s var(--ease-out),
-    opacity 0.2s var(--ease-out);
-}
-.btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-}
-.btn-primary:hover:not(:disabled) {
-  background: var(--mexican-red-hover);
-}
-.btn-primary:active:not(:disabled) {
-  background: var(--mexican-red-press);
-}
-.btn-ghost {
-  background: transparent;
-  color: var(--text-2);
-  border-color: var(--line);
-}
-.btn-ghost:hover:not(:disabled) {
-  background: var(--wash);
-  border-color: var(--edge);
-  color: var(--text);
-}
-.btn-ghost:active:not(:disabled) {
-  background: var(--wash-press);
-}
-.btn-quiet {
-  background: transparent;
-  color: var(--muted);
-}
-.btn-quiet:hover:not(:disabled) {
-  background: var(--wash);
-  color: var(--text);
-}
-.btn-quiet:active:not(:disabled) {
-  background: var(--wash-press);
+/* Component classes live in the components layer so utilities (rounded-none, text-lg…) can override them. */
+@layer components {
+  /* ---------- Press feedback ----------
+     One response for everything clickable: colour eases on hover, the element dips on press.
+     .btn and .copy-btn get it built in; any other clickable gets .tap (controls) or
+     .tap + .tap-surface (rows and cards, which dip less because they are bigger). */
+  .tap,
+  .btn,
+  .copy-btn {
+    transition-property: color, background-color, border-color, box-shadow, opacity, scale;
+    transition-duration: var(--dur-tap);
+    transition-timing-function: var(--ease-out);
+  }
+  .tap:active:not(:disabled),
+  .btn:active:not(:disabled),
+  .copy-btn:active:not(:disabled) {
+    scale: var(--tap-scale);
+  }
+  .tap-surface {
+    --tap-scale: 0.985;
+  }
+
+  /* ---------- Controls ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
+    user-select: none;
+  }
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-2);
+    border-color: var(--line);
+  }
+  .btn-quiet {
+    background: transparent;
+    color: var(--muted);
+  }
+  @media (hover: hover) {
+    .btn-primary:hover:not(:disabled) {
+      background: var(--mexican-red-hover);
+    }
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--wash);
+      border-color: var(--edge);
+      color: var(--text);
+    }
+    .btn-quiet:hover:not(:disabled) {
+      background: var(--wash);
+      color: var(--text);
+    }
+  }
+  .btn-primary:active:not(:disabled) {
+    background: var(--mexican-red-press);
+  }
+  .btn-ghost:active:not(:disabled),
+  .btn-quiet:active:not(:disabled) {
+    background: var(--wash-press);
+  }
+
+  .copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem;
+    border-radius: 0.5rem;
+    color: var(--muted);
+  }
+  @media (hover: hover) {
+    .copy-btn:hover:not(:disabled) {
+      color: var(--text);
+      background: var(--wash);
+    }
+  }
+  .copy-btn:active:not(:disabled) {
+    background: var(--wash-press);
+  }
+  .copy-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .field {
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--bg);
+    padding: 8px 12px;
+    font-size: 16px; /* 16px keeps iOS from zooming on focus */
+    color: var(--text);
+    outline: none;
+    transition-property: border-color, background-color, box-shadow;
+    transition-duration: var(--dur-tap);
+    transition-timing-function: var(--ease-out);
+  }
+  .field::placeholder {
+    color: var(--faint);
+  }
+  @media (hover: hover) {
+    .field:hover {
+      border-color: var(--edge);
+    }
+  }
+  .field:focus,
+  .field[aria-expanded="true"] {
+    border-color: var(--hl);
+    box-shadow: 0 0 0 3px var(--hl-soft);
+  }
+  select.field {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e908e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 34px;
+  }
+
+  .label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ---------- Layers ----------
+     Everything that floats (menus, the date picker, dialogs, toasts, inline confirmations)
+     arrives the same way: it wipes open from the edge it is anchored to while settling 6px.
+     No fades, no pops. Insets are padded by 24px so the shadow is never clipped. */
+
+  /* Stays mounted, toggled with data-open (account menu, date picker). */
+  .menu {
+    visibility: hidden;
+    transform: translateY(-6px) scale(0.98);
+    transform-origin: top left;
+    clip-path: inset(-24px -24px calc(100% + 24px) -24px);
+    pointer-events: none;
+    transition:
+      clip-path var(--dur-exit) var(--ease-in),
+      transform var(--dur-exit) var(--ease-in),
+      visibility 0s linear var(--dur-exit);
+  }
+  .menu[data-open="true"] {
+    visibility: visible;
+    transform: none;
+    clip-path: inset(-24px);
+    pointer-events: auto;
+    transition:
+      clip-path var(--dur-move) var(--ease-out),
+      transform var(--dur-move) var(--ease-out),
+      visibility 0s;
+  }
+
+  /* Mounted on demand (dialogs, inline confirmations). Exit with data-closing="true". */
+  .reveal {
+    transform-origin: top center;
+    animation: reveal-down var(--dur-move) var(--ease-out) both;
+  }
+  /* Anchored to the bottom edge (toasts). */
+  .reveal-up {
+    transform-origin: bottom center;
+    animation: reveal-up var(--dur-move) var(--ease-out) both;
+  }
+  [data-closing="true"].reveal {
+    animation: reveal-down-out var(--dur-exit) var(--ease-in) forwards;
+  }
+  [data-closing="true"].reveal-up {
+    animation: reveal-up-out var(--dur-exit) var(--ease-in) forwards;
+  }
+
+  .scrim {
+    background: var(--scrim);
+    animation: scrim-in var(--dur-move) var(--ease-out) both;
+  }
+  [data-closing="true"].scrim {
+    animation: scrim-out var(--dur-exit) var(--ease-in) forwards;
+  }
+
+  /* Side panel on desktop, full-height sheet from the bottom on phones. */
+  .panel {
+    animation: panel-in var(--dur-panel) var(--ease-out) both;
+  }
+  [data-closing="true"].panel {
+    animation: panel-out var(--dur-exit) var(--ease-in) forwards;
+  }
+  @media (max-width: 767px) {
+    .panel {
+      animation-name: sheet-in;
+    }
+    [data-closing="true"].panel {
+      animation-name: sheet-out;
+    }
+  }
+
+  /* ---------- Content ----------
+     Views and months slide in from the side they come from: style={{ "--dir": -1 | 0 | 1 }}. */
+  .slide-x {
+    animation: slide-x var(--dur-panel) var(--ease-out) both;
+  }
+
+  .today-dot {
+    animation: pulse-dot 2.4s ease-out infinite;
+  }
 }
 
-.field {
-  width: 100%;
-  border-radius: var(--radius);
-  border: 1px solid var(--line);
-  background: var(--bg);
-  padding: 8px 12px;
-  font-size: 16px;
-  color: var(--text);
-  outline: none;
-  transition:
-    border-color 0.2s var(--ease-out),
-    background-color 0.2s var(--ease-out),
-    box-shadow 0.25s var(--ease-out);
-}
-.field::placeholder {
-  color: var(--faint);
-}
-.field:hover {
-  border-color: var(--edge);
-}
-.field:focus {
-  border-color: var(--hl);
-  box-shadow: 0 0 0 3px var(--hl-soft);
-}
-select.field {
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238e908e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 34px;
-}
-input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
-  filter: invert(0.7);
-  cursor: pointer;
-}
-
-.label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-/* ---------- Motion ---------- */
-@keyframes rise-in {
+@keyframes reveal-down {
   from {
-    transform: translateX(calc(var(--dir, 1) * 28px));
+    clip-path: inset(-24px -24px calc(100% + 24px) -24px);
+    transform: translateY(-6px) scale(0.98);
   }
   to {
+    clip-path: inset(-24px);
     transform: none;
   }
 }
-@keyframes fade-in {
+@keyframes reveal-down-out {
   from {
-    transform: translateY(8px);
+    clip-path: inset(-24px);
+    transform: none;
   }
   to {
+    clip-path: inset(-24px -24px calc(100% + 24px) -24px);
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+@keyframes reveal-up {
+  from {
+    clip-path: inset(calc(100% + 24px) -24px -24px -24px);
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    clip-path: inset(-24px);
     transform: none;
   }
 }
-@keyframes fade-out {
+@keyframes reveal-up-out {
+  from {
+    clip-path: inset(-24px);
+    transform: none;
+  }
   to {
-    opacity: 0;
+    clip-path: inset(calc(100% + 24px) -24px -24px -24px);
+    transform: translateY(6px) scale(0.98);
   }
 }
 @keyframes scrim-in {
   from {
     opacity: 0;
   }
+}
+@keyframes scrim-out {
   to {
-    opacity: 1;
+    opacity: 0;
   }
 }
-@keyframes pop-in {
-  from {
-    transform: scale(0.96) translateY(-4px);
-  }
-  to {
-    transform: none;
-  }
-}
-@keyframes pop-out {
-  to {
-    transform: scale(0.97) translateY(8px);
-  }
-}
-@keyframes drawer-in {
+@keyframes panel-in {
   from {
     transform: translateX(100%);
   }
-  to {
-    transform: none;
-  }
 }
-@keyframes drawer-out {
+@keyframes panel-out {
   to {
     transform: translateX(100%);
   }
 }
-@keyframes sheet-up {
+@keyframes sheet-in {
   from {
     transform: translateY(100%);
   }
-  to {
-    transform: none;
-  }
 }
-@keyframes sheet-down {
+@keyframes sheet-out {
   to {
     transform: translateY(100%);
   }
 }
-@keyframes toast-in {
+@keyframes slide-x {
   from {
-    transform: translate(-50%, 12px);
-  }
-  to {
-    transform: translate(-50%, 0);
-  }
-}
-@keyframes toast-out {
-  to {
-    transform: translate(-50%, 8px);
+    transform: translateX(calc(var(--dir, 0) * var(--slide)));
   }
 }
 @keyframes pulse-dot {
@@ -281,94 +413,6 @@ input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
   50% {
     box-shadow: 0 0 0 5px rgba(163, 45, 41, 0);
   }
-}
-
-/* Entrance with optional stagger: style={{"--i": n}} */
-.rise-in {
-  animation: rise-in 0.45s var(--ease-out) both;
-  animation-delay: calc(var(--i, 0) * 35ms);
-}
-.slide-x {
-  animation: slide-x 0.4s var(--ease-out) both;
-}
-@keyframes slide-x {
-  from {
-    transform: translateX(calc(var(--dir, 0) * 48px));
-  }
-  to {
-    transform: none;
-  }
-}
-.fade-in {
-  animation: fade-in 0.25s var(--ease-out) both;
-}
-.pop-in {
-  animation: pop-in 0.22s var(--ease-out) both;
-  transform-origin: top left;
-}
-.scrim {
-  background: var(--scrim);
-  animation: scrim-in 0.4s var(--ease-out) both;
-}
-.drawer-in {
-  animation: drawer-in 0.4s var(--ease-out) both;
-}
-.sheet-in {
-  animation: pop-in 0.3s var(--ease-out) both;
-}
-.toast-in {
-  animation: toast-in 0.35s var(--ease-out) both;
-}
-.today-dot {
-  animation: pulse-dot 2.4s ease-out infinite;
-}
-
-/* Exit states (applied while a layer is closing) */
-[data-closing="true"].scrim {
-  animation: fade-out 0.22s ease-out forwards;
-}
-[data-closing="true"].drawer-in {
-  animation: drawer-out 0.22s ease-in forwards;
-}
-[data-closing="true"].sheet-in {
-  animation: pop-out 0.2s ease-in forwards;
-}
-[data-closing="true"].toast-in {
-  animation: toast-out 0.25s ease-in forwards;
-}
-
-@media (max-width: 767px) {
-  .drawer-in {
-    animation-name: sheet-up;
-  }
-  [data-closing="true"].drawer-in {
-    animation-name: sheet-down;
-  }
-}
-
-/* Menu: stays mounted so it can transition both ways */
-/* Closed: wipes up into its trigger (clip) while lifting slightly — no fade, no pop.
-   Insets are padded by 24px so the open state never clips the overlay shadow. */
-.menu {
-  visibility: hidden;
-  transform: translateY(-6px) scale(0.98);
-  transform-origin: top left;
-  clip-path: inset(-24px -24px calc(100% + 24px) -24px);
-  pointer-events: none;
-  transition:
-    clip-path 0.2s cubic-bezier(0.4, 0, 1, 1),
-    transform 0.2s cubic-bezier(0.4, 0, 1, 1),
-    visibility 0s linear 0.2s;
-}
-.menu[data-open="true"] {
-  visibility: visible;
-  transform: none;
-  clip-path: inset(-24px -24px -24px -24px);
-  pointer-events: auto;
-  transition:
-    clip-path 0.28s var(--ease-out),
-    transform 0.28s var(--ease-out),
-    visibility 0s;
 }
 
 ::-webkit-scrollbar {
@@ -393,24 +437,4 @@ input[type="datetime-local"].field::-webkit-calendar-picker-indicator {
     transition-duration: 0.01ms !important;
     transition-delay: 0ms !important;
   }
-}
-
-.copy-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.35rem;
-  border-radius: 0.5rem;
-  color: var(--muted);
-  transition:
-    color 0.2s var(--ease-out),
-    background-color 0.2s var(--ease-out);
-}
-.copy-btn:hover:not(:disabled) {
-  color: var(--text);
-  background: var(--soft);
-}
-.copy-btn:disabled {
-  opacity: 0.35;
-  cursor: default;
 }

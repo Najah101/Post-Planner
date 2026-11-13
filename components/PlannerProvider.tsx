@@ -8,6 +8,7 @@ import {
   savePostAction,
   updateAccountAction,
 } from "@/app/actions";
+import { DUR_EXIT } from "@/lib/motion";
 import PostDrawer from "./PostDrawer";
 
 interface DrawerState {
@@ -65,7 +66,7 @@ export default function PlannerProvider({
     timers.current.forEach(clearTimeout);
     setLeaving(false);
     setMessage(msg);
-    timers.current = [setTimeout(() => setLeaving(true), 3200), setTimeout(() => setMessage(null), 3500)];
+    timers.current = [setTimeout(() => setLeaving(true), 3200), setTimeout(() => setMessage(null), 3200 + DUR_EXIT)];
   }, []);
 
   const patchPost = useCallback(
@@ -158,13 +159,15 @@ export default function PlannerProvider({
         />
       )}
       {message && (
-        <div
-          role="status"
-          key={message}
-          data-closing={leaving}
-          className="toast-in fixed bottom-24 left-1/2 z-[60] -translate-x-1/2 rounded-lg border border-edge bg-soft px-4 py-2.5 text-sm text-ink shadow-[var(--shadow-overlay)] md:bottom-6"
-        >
-          {message}
+        <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5rem+env(safe-area-inset-bottom))] z-[60] flex justify-center px-4 md:bottom-6">
+          <div
+            role="status"
+            key={message}
+            data-closing={leaving}
+            className="reveal-up pointer-events-auto max-w-md rounded-lg border border-edge bg-soft px-4 py-2.5 text-center text-sm text-ink shadow-[var(--shadow-overlay)]"
+          >
+            {message}
+          </div>
         </div>
       )}
     </PlannerContext.Provider>
