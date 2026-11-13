@@ -48,11 +48,11 @@ export default function UpcomingView() {
   const groups = groupPosts(posts);
 
   return (
-    <section className="mx-auto max-w-2xl">
+    <section>
       <h1 className="mb-5 text-2xl font-semibold tracking-tight">Upcoming</h1>
 
       {groups.length === 0 && (
-        <div className="rounded-lg border border-dashed border-line px-6 py-16 text-center">
+        <div className="mx-auto max-w-2xl rounded-lg border border-dashed border-line px-6 py-16 text-center">
           <Sparkles size={28} aria-hidden className="mx-auto text-hl" />
           <p className="mt-3 font-semibold">Nothing planned yet</p>
           <p className="mt-1 text-sm text-muted">Add your first post to start filling the calendar.</p>
@@ -72,29 +72,25 @@ export default function UpcomingView() {
             >
               {g.label} · {g.posts.length}
             </h2>
-            <ul className="space-y-3">
+            <ul className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {g.posts.map((p) => (
-                <li key={p.id}>
-                  <button
-                    onClick={() => openPost(p.id)}
-                    className="tap tap-surface flex w-full gap-3 rounded-lg border border-line bg-card p-3 text-left hover:border-edge hover:bg-soft sm:gap-4"
-                  >
-                    <PostThumb post={p} showBadge className="aspect-[4/5] w-24 shrink-0 rounded-md sm:w-28" />
-                    <div className="flex min-w-0 flex-1 flex-col py-0.5">
-                      <div className="mb-1.5 flex flex-wrap items-center gap-2">
-                        <StatusChip status={p.status} />
-                        <span className="inline-flex items-center gap-1.5 text-xs text-muted">
-                          <TypeIcon type={p.post_type} /> {TYPE_META[p.post_type].label}
-                        </span>
-                      </div>
-                      <h3 className="line-clamp-2 font-semibold leading-snug">{p.title}</h3>
-                      {p.caption && <p className="mt-1 line-clamp-2 text-sm text-muted">{p.caption}</p>}
-                      <p className={`mt-auto pt-2 text-sm font-medium ${g.tone === "overdue" ? "text-hl" : "text-ink2"}`}>
-                        {p.planned_at
-                          ? format(wall(p.planned_at), "EEE d MMM · h:mm a")
-                          : "Pick a date"}
-                      </p>
+                <li key={p.id} className="min-w-0">
+                  <button onClick={() => openPost(p.id)} className="tap tap-surface group block w-full text-left">
+                    <PostThumb
+                      post={p}
+                      showBadge
+                      className="aspect-[4/5] w-full rounded-lg border border-line transition-colors group-hover:border-edge"
+                    />
+                    <h3 className="mt-2 line-clamp-2 text-sm font-semibold leading-snug">{p.title}</h3>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <StatusChip status={p.status} />
+                      <span className="inline-flex items-center gap-1 text-xs text-muted">
+                        <TypeIcon type={p.post_type} /> {TYPE_META[p.post_type].label}
+                      </span>
                     </div>
+                    <p className={`mt-1 text-xs font-medium ${g.tone === "overdue" ? "text-hl" : "text-ink2"}`}>
+                      {p.planned_at ? format(wall(p.planned_at), "EEE d MMM · h:mm a") : "Pick a date"}
+                    </p>
                   </button>
                 </li>
               ))}
