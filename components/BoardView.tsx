@@ -7,6 +7,7 @@ import {
   DragOverlay,
   MouseSensor,
   TouchSensor,
+  useDndContext,
   useDraggable,
   useDroppable,
   useSensor,
@@ -89,17 +90,25 @@ function Column({
   onAdd: () => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `status:${status}` });
+  const { active } = useDndContext();
+  // While dragging, every other column shows it can take the card; the one under it lights up.
+  const candidate = active !== null && active.data.current?.status !== status;
+  const target = isOver && candidate;
   const m = STATUS_META[status];
   return (
     <div
       ref={setNodeRef}
       className={`flex w-[78vw] max-w-72 shrink-0 snap-start flex-col rounded-lg border bg-card/60 p-2.5 transition-colors md:w-auto md:max-w-none ${
-        isOver ? "border-[var(--hl-line)] bg-hl/10" : "border-line"
+        target
+          ? "border-hl bg-hl/10 shadow-[inset_0_0_0_1px_var(--hl)]"
+          : candidate
+            ? "border-dashed border-edge"
+            : "border-line"
       }`}
     >
       <div className="mb-2.5 flex items-center gap-2 px-1">
         <span className="size-2 rounded-full" style={{ background: m.color }} />
-        <h2 className="text-sm font-semibold">{m.label}</h2>
+        <h2 className={`text-sm font-semibold transition-colors ${target ? "text-hl" : ""}`}>{m.label}</h2>
         <span className="text-xs text-muted">{posts.length}</span>
         <button
           onClick={onAdd}
@@ -113,10 +122,16 @@ function Column({
         {posts.map((p) => (
           <DraggableCard key={p.id} post={p} onOpen={onOpen} />
         ))}
-        {posts.length === 0 && (
-          <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-muted">
-            Drop posts here
+        {target ? (
+          <p className="reveal rounded-lg border border-dashed border-hl bg-hl/10 px-3 py-6 text-center text-xs font-semibold text-hl">
+            Move to {m.label}
           </p>
+        ) : (
+          posts.length === 0 && (
+            <p className="rounded-lg border border-dashed border-line px-3 py-6 text-center text-xs text-muted">
+              Drop posts here
+            </p>
+          )
         )}
       </div>
     </div>
@@ -124,7 +139,7 @@ function Column({
 }
 
 function DraggableCard({ post, onOpen }: { post: Post; onOpen: (id: string) => void }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: post.id });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: post.id, data: { status: post.status } });
   return (
     <div
       ref={setNodeRef}

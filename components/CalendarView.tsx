@@ -7,6 +7,7 @@ import {
   DragOverlay,
   MouseSensor,
   TouchSensor,
+  useDndContext,
   useDraggable,
   useDroppable,
   useSensor,
@@ -204,7 +205,12 @@ function DayCell({
   onOpen: (id: string) => void;
   onAdd: () => void;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `day:${dayKey(day)}` });
+  const key = dayKey(day);
+  const { setNodeRef, isOver } = useDroppable({ id: `day:${key}` });
+  const { active } = useDndContext();
+  const dragging = active !== null;
+  // Dropping a post on the day it is already on does nothing, so that day doesn't light up.
+  const target = isOver && active?.data.current?.day !== key;
   const today = isToday(day);
   const shown = posts.slice(0, MAX_PER_DAY);
   const extra = posts.length - shown.length;
@@ -215,12 +221,18 @@ function DayCell({
       onClick={onAdd}
       className={`group relative min-h-[84px] cursor-pointer border-b border-r border-line p-1 transition-[background-color,box-shadow] md:p-1.5 [&:nth-child(7n)]:border-r-0 ${
         inMonth ? "" : "bg-bg/60"
-      } ${isOver ? "bg-hl/10 shadow-[inset_0_0_0_1px_var(--hl-line)]" : "hover:bg-wash"}`}
+      } ${target ? "bg-hl/10 shadow-[inset_0_0_0_2px_var(--hl)]" : dragging ? "" : "hover:bg-wash"}`}
     >
       <div className="mb-1 flex items-center justify-between">
         <span
           className={`flex size-6 items-center justify-center rounded-full text-xs font-medium ${
-            today ? "today-dot bg-accent font-semibold text-white" : inMonth ? "text-ink" : "text-faint"
+            today
+              ? "today-dot bg-accent font-semibold text-white"
+              : target
+                ? "font-semibold text-hl"
+                : inMonth
+                  ? "text-ink"
+                  : "text-faint"
           }`}
         >
           {format(day, "d")}
@@ -228,7 +240,9 @@ function DayCell({
         <Plus
           size={14}
           aria-hidden
-          className="t-move hidden -translate-x-1 text-muted opacity-0 transition-[translate,opacity] group-hover:translate-x-0 group-hover:opacity-100 md:block"
+          className={`t-move hidden -translate-x-1 text-muted opacity-0 transition-[translate,opacity] md:block ${
+            dragging ? "" : "group-hover:translate-x-0 group-hover:opacity-100"
+          }`}
         />
       </div>
       <div className="flex flex-col gap-1">
@@ -236,13 +250,21 @@ function DayCell({
           <DraggableChip key={p.id} post={p} onOpen={onOpen} />
         ))}
         {extra > 0 && <span className="px-1 text-[11px] font-medium text-muted">+{extra} more</span>}
+        {target && (
+          <div className="reveal flex h-7 items-center justify-center rounded-lg border border-dashed border-hl bg-hl/10 text-[11px] font-semibold text-hl md:h-9">
+            <span className="hidden md:inline">Move here</span>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 function DraggableChip({ post, onOpen }: { post: Post; onOpen: (id: string) => void }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: post.id });
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: post.id,
+    data: { day: post.planned_at ? dayKey(wall(post.planned_at)) : null },
+  });
   return (
     <div
       ref={setNodeRef}
