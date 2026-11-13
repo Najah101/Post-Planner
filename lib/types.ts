@@ -24,6 +24,8 @@ export interface Account {
   name: string;
   emoji: string;
   created_at: string;
+  /** Secret for the account's share link. Server-only: stripped before reaching the browser. */
+  share_token?: string | null;
 }
 
 export interface Post {

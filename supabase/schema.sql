@@ -6,8 +6,12 @@ create table if not exists accounts (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   emoji text not null default '📸',
+  share_token text unique,
   created_at timestamptz not null default now()
 );
+
+-- For databases created before share links existed:
+alter table accounts add column if not exists share_token text unique;
 
 create table if not exists posts (
   id uuid primary key default gen_random_uuid(),

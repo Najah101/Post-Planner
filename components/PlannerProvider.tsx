@@ -17,6 +17,8 @@ interface DrawerState {
 
 interface Ctx {
   account: Account;
+  /** Unlocked with the passcode. Guests (share link) can only work in their shared account(s). */
+  isOwner: boolean;
   accounts: Account[];
   posts: Post[];
   openPost: (id: string) => void;
@@ -43,11 +45,13 @@ export default function PlannerProvider({
   account,
   initialAccounts,
   initialPosts,
+  isOwner,
   children,
 }: {
   account: Account;
   initialAccounts: Account[];
   initialPosts: Post[];
+  isOwner: boolean;
   children: React.ReactNode;
 }) {
   const [accounts, setAccounts] = useState(initialAccounts);
@@ -124,6 +128,7 @@ export default function PlannerProvider({
   const value = useMemo<Ctx>(
     () => ({
       account: accounts.find((a) => a.id === account.id) ?? account,
+      isOwner,
       accounts,
       posts,
       openPost: (id) => setDrawer({ postId: id, defaults: {} }),
@@ -136,7 +141,7 @@ export default function PlannerProvider({
       editAccount,
       toast,
     }),
-    [account, accounts, posts, patchPost, savePost, removePost, addAccount, editAccount, toast],
+    [account, isOwner, accounts, posts, patchPost, savePost, removePost, addAccount, editAccount, toast],
   );
 
   const editing = drawer?.postId ? posts.find((p) => p.id === drawer.postId) : undefined;

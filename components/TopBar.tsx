@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { CalendarDays, Check, ChevronDown, Columns3, ListTodo, Pencil, Plus } from "lucide-react";
+import { CalendarDays, Check, ChevronDown, Columns3, Copy, Link2, ListTodo, Pencil, Plus, RotateCcw } from "lucide-react";
+import { getShareTokenAction, resetShareTokenAction } from "@/app/actions";
 import { useExit } from "@/lib/useExit";
 import { usePlanner } from "./PlannerProvider";
 
@@ -82,10 +83,10 @@ export default function TopBar() {
 }
 
 function AccountSwitcher({ view }: { view: string }) {
-  const { account, accounts, addAccount, editAccount } = usePlanner();
+  const { account, accounts, isOwner, addAccount, editAccount } = usePlanner();
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [dialog, setDialog] = useState<"add" | "rename" | null>(null);
+  const [dialog, setDialog] = useState<"add" | "rename" | "share" | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -101,6 +102,16 @@ function AccountSwitcher({ view }: { view: string }) {
       document.removeEventListener("keydown", onKey);
     };
   }, [open]);
+
+  // A guest with a single shared account has nothing to switch to.
+  if (!isOwner && accounts.length <= 1) {
+    return (
+      <div className="flex items-center gap-2 rounded-lg border border-line bg-card py-1 pl-1 pr-3">
+        <span className="flex size-8 items-center justify-center rounded-md bg-soft text-base">{account.emoji}</span>
+        <span className="max-w-[9rem] truncate text-sm font-semibold">{account.name}</span>
+      </div>
+    );
+  }
 
   const item =
     "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors duration-150 hover:bg-soft";
@@ -146,32 +157,51 @@ function AccountSwitcher({ view }: { view: string }) {
             {a.id === account.id && <Check size={16} aria-hidden className="text-hl" />}
           </button>
         ))}
-        <div className="my-1 border-t border-line" />
-        <button
-          role="menuitem"
-          tabIndex={open ? 0 : -1}
-          onClick={() => {
-            setOpen(false);
-            setDialog("rename");
-          }}
-          className={`${item} text-ink2`}
-        >
-          <Pencil size={16} aria-hidden className="text-muted" /> Rename this account
-        </button>
-        <button
-          role="menuitem"
-          tabIndex={open ? 0 : -1}
-          onClick={() => {
-            setOpen(false);
-            setDialog("add");
-          }}
-          className={`${item} text-ink2`}
-        >
-          <Plus size={16} aria-hidden className="text-muted" /> Add account
-        </button>
+        {isOwner && (
+          <>
+            <div className="my-1 border-t border-line" />
+            <button
+              role="menuitem"
+              tabIndex={open ? 0 : -1}
+              onClick={() => {
+                setOpen(false);
+                setDialog("share");
+              }}
+              className={`${item} text-ink2`}
+            >
+              <Link2 size={16} aria-hidden className="text-muted" /> Share this account
+            </button>
+            <button
+              role="menuitem"
+              tabIndex={open ? 0 : -1}
+              onClick={() => {
+                setOpen(false);
+                setDialog("rename");
+              }}
+              className={`${item} text-ink2`}
+            >
+              <Pencil size={16} aria-hidden className="text-muted" /> Rename this account
+            </button>
+            <button
+              role="menuitem"
+              tabIndex={open ? 0 : -1}
+              onClick={() => {
+                setOpen(false);
+                setDialog("add");
+              }}
+              className={`${item} text-ink2`}
+            >
+              <Plus size={16} aria-hidden className="text-muted" /> Add account
+            </button>
+          </>
+        )}
       </div>
 
-      {dialog && (
+      {dialog === "share" && (
+        <ShareDialog accountId={account.id} accountName={account.name} onClose={() => setDialog(null)} />
+      )}
+
+      {(dialog === "add" || dialog === "rename") && (
         <AccountDialog
           mode={dialog}
           initialName={dialog === "rename" ? account.name : ""}
@@ -256,6 +286,102 @@ function AccountDialog({
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function ShareDialog({
+  accountId,
+  accountName,
+  onClose: finish,
+}: {
+  accountId: string;
+  accountName: string;
+  onClose: () => void;
+}) {
+  const { toast } = usePlanner();
+  const { closing, close } = useExit(finish);
+  const [token, setToken] = useState<string | null>(null);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    getShareTokenAction(accountId)
+      .then(setToken)
+      .catch(() => toast("Couldn’t load the share link."));
+  }, [accountId, toast]);
+
+  const link = token ? `${window.location.origin}/s/${token}` : "";
+
+  async function reset() {
+    setBusy(true);
+    try {
+      setToken(await resetShareTokenAction(accountId));
+      toast("New link created. The old one no longer works.");
+    } catch {
+      toast("Couldn’t reset the link.");
+    }
+    setBusy(false);
+    setConfirmReset(false);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <button aria-label="Close" onClick={close} data-closing={closing} className="scrim absolute inset-0" />
+      <div
+        data-closing={closing}
+        className="sheet-in relative w-full max-w-md rounded-lg border border-line bg-card p-6 shadow-[var(--shadow-overlay)]"
+      >
+        <h2 className="text-xl font-semibold tracking-tight">Share {accountName}</h2>
+        <p className="mt-1 text-sm text-muted">
+          Anyone with this link can plan and edit posts for this account only. They won’t see your other accounts.
+        </p>
+        <div className="mt-4 flex gap-2">
+          <input
+            readOnly
+            aria-label="Share link"
+            className="field min-w-0 flex-1 text-sm"
+            value={link || "Creating link…"}
+            onFocus={(e) => e.target.select()}
+          />
+          <button
+            type="button"
+            disabled={!link}
+            onClick={async () => {
+              await navigator.clipboard.writeText(link);
+              toast("Link copied.");
+            }}
+            className="btn btn-primary"
+          >
+            <Copy size={15} aria-hidden /> Copy
+          </button>
+        </div>
+        <div className="mt-6 flex items-center justify-between gap-2">
+          {confirmReset ? (
+            <p className="text-sm text-ink2">The old link will stop working.</p>
+          ) : (
+            <button type="button" disabled={!link} onClick={() => setConfirmReset(true)} className="btn btn-quiet">
+              <RotateCcw size={15} aria-hidden /> Reset link
+            </button>
+          )}
+          <div className="flex gap-2">
+            {confirmReset ? (
+              <>
+                <button type="button" onClick={() => setConfirmReset(false)} className="btn btn-quiet">
+                  Cancel
+                </button>
+                <button type="button" disabled={busy} onClick={reset} className="btn btn-primary">
+                  Reset
+                </button>
+              </>
+            ) : (
+              <button type="button" onClick={close} className="btn btn-quiet">
+                Done
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

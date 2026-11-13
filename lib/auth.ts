@@ -1,5 +1,10 @@
 // Shared-passcode gate. Works in both the proxy (edge) and Node runtimes (Web Crypto only).
 export const COOKIE_NAME = "pp_session";
+/** Share-link tokens this browser has opened, comma-separated. Each grants one account. */
+export const GUEST_COOKIE = "pp_guest";
+
+export const parseGuestTokens = (value: string | undefined): string[] =>
+  (value ?? "").split(",").filter((t) => /^[A-Za-z0-9_-]{16,64}$/.test(t)).slice(0, 20);
 
 /** When no passcode is configured (local dev) the gate is off. */
 export const gateEnabled = () => Boolean(process.env.APP_PASSCODE);

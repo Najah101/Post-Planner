@@ -13,6 +13,9 @@ export interface Store {
   listAccounts(): Promise<Account[]>;
   createAccount(name: string, emoji: string): Promise<Account>;
   updateAccount(id: string, patch: { name?: string; emoji?: string }): Promise<void>;
+  findAccountByShareToken(token: string): Promise<Account | null>;
+  setShareToken(accountId: string, token: string | null): Promise<void>;
+  getPost(id: string): Promise<Post | null>;
   listPosts(accountId: string): Promise<Post[]>;
   upsertPost(input: PostInput): Promise<Post>;
   deletePost(id: string): Promise<void>;
@@ -81,6 +84,18 @@ const localStore: Store = {
     if (acc) Object.assign(acc, patch);
     await writeDb(db);
   },
+  async findAccountByShareToken(token) {
+    return (await readDb()).accounts.find((a) => a.share_token === token) ?? null;
+  },
+  async setShareToken(accountId, token) {
+    const db = await readDb();
+    const acc = db.accounts.find((a) => a.id === accountId);
+    if (acc) acc.share_token = token;
+    await writeDb(db);
+  },
+  async getPost(id) {
+    return (await readDb()).posts.find((p) => p.id === id) ?? null;
+  },
   async listPosts(accountId) {
     return (await readDb()).posts.filter((p) => p.account_id === accountId);
   },
@@ -130,6 +145,15 @@ function supabaseStore(url: string, key: string): Store {
     },
     async updateAccount(id, patch) {
       check(await db.from("accounts").update(patch).eq("id", id));
+    },
+    async findAccountByShareToken(token) {
+      return check(await db.from("accounts").select("*").eq("share_token", token).maybeSingle());
+    },
+    async setShareToken(accountId, token) {
+      check(await db.from("accounts").update({ share_token: token }).eq("id", accountId));
+    },
+    async getPost(id) {
+      return check(await db.from("posts").select("*").eq("id", id).maybeSingle());
     },
     async listPosts(accountId) {
       return check(await db.from("posts").select("*").eq("account_id", accountId));

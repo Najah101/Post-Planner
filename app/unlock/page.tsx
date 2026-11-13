@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { use, useState } from "react";
 import { CalendarDays } from "lucide-react";
 
-export default function UnlockPage() {
+export default function UnlockPage({ searchParams }: { searchParams: Promise<{ expired?: string }> }) {
+  const expired = use(searchParams).expired !== undefined;
   const [code, setCode] = useState("");
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -35,7 +36,11 @@ export default function UnlockPage() {
           <CalendarDays size={22} aria-hidden />
         </div>
         <h1 className="text-xl font-semibold tracking-tight">Post Planner</h1>
-        <p className="mt-1 text-sm text-muted">Enter the passcode to continue</p>
+        <p className="mt-1 text-sm text-muted">
+          {expired
+            ? "That share link no longer works. Ask for a new one, or enter the passcode."
+            : "Enter the passcode to continue"}
+        </p>
         <input
           type="password"
           autoFocus

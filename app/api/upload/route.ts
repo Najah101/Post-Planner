@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
+import { getAccess } from "@/lib/access";
 import { getStore } from "@/lib/store";
 
 export const runtime = "nodejs";
 
 // Images are compressed in the browser first, so they stay well under Vercel's 4.5MB body limit.
 export async function POST(request: Request) {
+  const access = await getAccess();
+  if (!access.owner && access.accountIds.length === 0) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   const form = await request.formData();
   const file = form.get("file");
   if (!(file instanceof File) || file.size === 0) {
