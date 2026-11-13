@@ -74,8 +74,6 @@ export default function CalendarView() {
     return map;
   }, [posts]);
 
-  const unscheduled = posts.filter((p) => !p.planned_at && p.status !== "posted");
-
   function onDragStart(e: DragStartEvent) {
     setDragging(posts.find((p) => p.id === e.active.id) ?? null);
   }
@@ -163,31 +161,6 @@ export default function CalendarView() {
           )}
         </DragOverlay>
       </DndContext>
-
-      {unscheduled.length > 0 && (
-        <div className="mt-6 md:mt-3 md:shrink-0">
-          <h2 className="mb-2 text-sm font-semibold">
-            No date yet <span className="font-normal text-muted">· {unscheduled.length}</span>
-          </h2>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {unscheduled.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => openPost(p.id)}
-                className="tap tap-surface group w-28 shrink-0 text-left"
-              >
-                <PostThumb
-                  post={p}
-                  className="aspect-[4/5] rounded-lg border border-line transition-colors group-hover:border-edge"
-                />
-                <p className="mt-1.5 truncate text-xs font-medium text-ink2 transition-colors group-hover:text-ink">
-                  {p.title}
-                </p>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </section>
   );
 }
