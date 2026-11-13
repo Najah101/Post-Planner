@@ -21,7 +21,6 @@ import type { Post, Status } from "@/lib/types";
 import { STATUSES, STATUS_META, TYPE_META } from "@/lib/types";
 import { DROP_ANIMATION } from "@/lib/motion";
 import { usePlanner } from "./PlannerProvider";
-import PostThumb from "./PostThumb";
 import TypeIcon from "./TypeIcon";
 
 export default function BoardView() {
@@ -53,7 +52,8 @@ export default function BoardView() {
         onDragEnd={onDragEnd}
         onDragCancel={() => setDragging(null)}
       >
-        <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-4 md:mx-0 md:grid md:grid-cols-5 md:overflow-visible md:px-0">
+        {/* items-start: each column is only as tall as its own cards. */}
+        <div className="-mx-4 flex snap-x items-start gap-3 overflow-x-auto px-4 pb-4 md:mx-0 md:grid md:grid-cols-5 md:overflow-visible md:px-0">
           {STATUSES.map((s) => (
             <Column
               key={s}
@@ -118,7 +118,7 @@ function Column({
           <Plus size={16} aria-hidden />
         </button>
       </div>
-      <div className="flex min-h-24 flex-col gap-2.5">
+      <div className="flex min-h-24 flex-col gap-2">
         {posts.map((p) => (
           <DraggableCard key={p.id} post={p} onOpen={onOpen} />
         ))}
@@ -157,7 +157,6 @@ function CardBody({ post }: { post: Post }) {
   const overdue = post.planned_at && post.status !== "posted" && wall(post.planned_at) < new Date();
   return (
     <article className="overflow-hidden rounded-lg border border-line bg-soft transition-colors hover:border-edge">
-      <PostThumb post={post} showBadge className="aspect-[4/3] w-full" />
       <div className="p-2.5">
         <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{post.title}</h3>
         <div className="mt-1.5 flex items-center gap-2 text-xs text-muted">
