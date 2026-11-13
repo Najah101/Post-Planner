@@ -86,7 +86,7 @@ export default function CalendarView() {
     if (!post || typeof over !== "string" || !over.startsWith("day:")) return;
     const day = new Date(`${over.slice(4)}T12:00:00`);
     if (post.planned_at && dayKey(wall(post.planned_at)) === over.slice(4)) return;
-    patchPost(post.id, { planned_at: moveToDay(post.planned_at, day) });
+    patchPost(post.id, { planned_at: moveToDay(post.planned_at, day) }, `Moved to ${format(day, "EEE d MMM")}`);
   }
 
   return (

@@ -24,6 +24,13 @@ export async function deletePostAction(id: string): Promise<void> {
   await getStore().deletePost(id);
 }
 
+/** Undo for a delete. Only re-creates a post whose id is free, in an account the caller can access. */
+export async function restorePostAction(post: Post): Promise<Post> {
+  await requireAccount(post.account_id);
+  if (await getStore().getPost(post.id)) throw new Error("Post already exists");
+  return getStore().restorePost(post);
+}
+
 export async function createAccountAction(name: string, emoji: string): Promise<Account> {
   await requireOwner();
   return publicAccount(await getStore().createAccount(name.trim() || "New account", emoji || "📸"));

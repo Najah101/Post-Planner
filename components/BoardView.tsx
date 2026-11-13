@@ -38,7 +38,7 @@ export default function BoardView() {
     const over = e.over?.id;
     if (!post || typeof over !== "string" || !over.startsWith("status:")) return;
     const status = over.slice(7) as Status;
-    if (status !== post.status) patchPost(post.id, { status });
+    if (status !== post.status) patchPost(post.id, { status }, `Moved to ${STATUS_META[status].label}`);
   }
 
   return (

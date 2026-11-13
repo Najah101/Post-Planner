@@ -19,6 +19,8 @@ export interface Store {
   listPosts(accountId: string): Promise<Post[]>;
   upsertPost(input: PostInput): Promise<Post>;
   deletePost(id: string): Promise<void>;
+  /** Puts a deleted post back exactly as it was (same id and created_at). */
+  restorePost(post: Post): Promise<Post>;
   saveImage(file: File): Promise<string>;
 }
 
@@ -118,6 +120,13 @@ const localStore: Store = {
     db.posts = db.posts.filter((p) => p.id !== id);
     await writeDb(db);
   },
+  async restorePost(post) {
+    const db = await readDb();
+    const restored = { ...post, updated_at: now() };
+    db.posts.push(restored);
+    await writeDb(db);
+    return restored;
+  },
   async saveImage(file) {
     await fs.mkdir(UPLOAD_DIR, { recursive: true });
     const name = `${randomUUID()}.jpg`;
@@ -174,6 +183,9 @@ function supabaseStore(db: SupabaseClient): Store {
     },
     async deletePost(id) {
       check(await db.from("posts").delete().eq("id", id));
+    },
+    async restorePost(post) {
+      return check(await db.from("posts").insert({ ...post, updated_at: now() }).select().single());
     },
     async saveImage(file) {
       const name = `${randomUUID()}.jpg`;
