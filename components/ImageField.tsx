@@ -49,7 +49,7 @@ export default function ImageField({
         <div className="group relative aspect-[4/5] w-full max-w-[220px] overflow-hidden rounded-lg border border-line bg-soft">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt={label} className="size-full object-cover" />
-          <div className="absolute inset-x-0 bottom-0 flex gap-2 bg-gradient-to-t from-black/70 to-transparent p-2 pt-8">
+          <div className="hover-reveal absolute inset-x-0 bottom-0 flex gap-2 bg-gradient-to-t from-black/70 to-transparent p-2 pt-8">
             <button
               type="button"
               onClick={() => input.current?.click()}
