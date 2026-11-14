@@ -131,9 +131,6 @@ function AccountSwitcher({ view }: { view: string }) {
     );
   }
 
-  const item =
-    "tap tap-surface flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-wash active:bg-[var(--wash-press)]";
-
   return (
     <div className="relative min-w-0" ref={ref}>
       <button
@@ -168,7 +165,8 @@ function AccountSwitcher({ view }: { view: string }) {
               setOpen(false);
               router.push(`/${a.id}/${view}`);
             }}
-            className={`${item} ${a.id === account.id ? "font-semibold" : "text-ink2"}`}
+            aria-current={a.id === account.id}
+            className="menu-item"
           >
             <span className="text-lg">{a.emoji}</span>
             <span className="flex-1 truncate">{a.name}</span>
@@ -185,7 +183,7 @@ function AccountSwitcher({ view }: { view: string }) {
                 setOpen(false);
                 setDialog("share");
               }}
-              className={`${item} text-ink2`}
+              className="menu-item"
             >
               <Link2 size={16} aria-hidden className="text-muted" /> Share this account
             </button>
@@ -196,7 +194,7 @@ function AccountSwitcher({ view }: { view: string }) {
                 setOpen(false);
                 setDialog("rename");
               }}
-              className={`${item} text-ink2`}
+              className="menu-item"
             >
               <Pencil size={16} aria-hidden className="text-muted" /> Rename this account
             </button>
@@ -207,7 +205,7 @@ function AccountSwitcher({ view }: { view: string }) {
                 setOpen(false);
                 setDialog("add");
               }}
-              className={`${item} text-ink2`}
+              className="menu-item"
             >
               <Plus size={16} aria-hidden className="text-muted" /> Add account
             </button>

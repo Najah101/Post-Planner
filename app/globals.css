@@ -115,17 +115,20 @@ body {
      .tap + .tap-surface (rows and cards, which dip less because they are bigger). */
   .tap,
   .btn,
-  .copy-btn {
+  .copy-btn,
+  .menu-item {
     transition-property: color, background-color, border-color, box-shadow, opacity, scale;
     transition-duration: var(--dur-tap);
     transition-timing-function: var(--ease-out);
   }
   .tap:active:not(:disabled),
   .btn:active:not(:disabled),
-  .copy-btn:active:not(:disabled) {
+  .copy-btn:active:not(:disabled),
+  .menu-item:active:not(:disabled) {
     scale: var(--tap-scale);
   }
-  .tap-surface {
+  .tap-surface,
+  .menu-item {
     --tap-scale: 0.985;
   }
 
@@ -280,6 +283,36 @@ body {
       clip-path var(--dur-move) var(--ease-out),
       transform var(--dur-move) var(--ease-out),
       visibility 0s;
+  }
+
+  /* A row inside a .menu (account menu, select options). Selected rows set aria-selected
+     or aria-current; keyboard-highlighted rows set data-active. */
+  .menu-item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 12px;
+    border-radius: 6px;
+    padding: 8px 12px;
+    text-align: left;
+    font-size: 14px;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .menu-item[data-active="true"] {
+    background: var(--wash);
+  }
+  @media (hover: hover) {
+    .menu-item:hover {
+      background: var(--wash);
+    }
+  }
+  .menu-item:active {
+    background: var(--wash-press);
+  }
+  .menu-item:is([aria-selected="true"], [aria-current="true"]) {
+    color: var(--text);
+    font-weight: 600;
   }
 
   /* Mounted on demand (dialogs, inline confirmations). Exit with data-closing="true". */
