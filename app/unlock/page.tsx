@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { CalendarDays } from "lucide-react";
+import Logo from "@/components/Logo";
 
 export default function UnlockPage({ searchParams }: { searchParams: Promise<{ expired?: string }> }) {
   const expired = use(searchParams).expired !== undefined;
@@ -32,10 +32,8 @@ export default function UnlockPage({ searchParams }: { searchParams: Promise<{ e
         onSubmit={submit}
         className="reveal w-full max-w-sm rounded-lg border border-line bg-card p-8 text-center"
       >
-        <div className="mx-auto mb-5 flex size-12 items-center justify-center rounded-lg bg-accent text-white">
-          <CalendarDays size={22} aria-hidden />
-        </div>
-        <h1 className="text-xl font-semibold tracking-tight">Post Planner</h1>
+        <Logo size={48} className="mx-auto mb-5" />
+        <h1 className="text-xl font-semibold tracking-tight">Metabasis</h1>
         <p className="mt-1 text-sm text-muted">
           {expired
             ? "That share link no longer works. Ask for a new one, or enter the passcode."
