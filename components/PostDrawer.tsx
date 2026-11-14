@@ -196,7 +196,7 @@ export default function PostDrawer({
           </div>
 
           <div>
-            <label className="label" htmlFor="inspo">Link</label>
+            <label className="label" htmlFor="inspo">Inspiration link</label>
             <input
               id="inspo"
               className="field"
