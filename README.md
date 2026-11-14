@@ -1,4 +1,8 @@
-# Post Planner
+<img src="app/icon.svg" alt="Metabasis logo" width="64" align="right" />
+
+# Metabasis
+
+*Metabasis* (Greek): a shift from one state to another. Every post moves through stages, from idea to posted.
 
 A visual planner for Instagram posts: track each post's edit status, plan its date and time, keep the inspo (screenshot + link), and show the final thumbnail. Built for the bakery account, with an account switcher for others later.
 

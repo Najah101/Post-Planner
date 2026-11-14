@@ -1,6 +1,6 @@
-# Post Planner
+# Metabasis
 
-A visual planner for Instagram posts: track each post's edit status, plan its date and time, keep the inspo (screenshot + link) and show the final thumbnail. Built for one bakery account, with an account switcher for others. See [README.md](README.md) for setup, deployment and sharing.
+(Greek: a shift from one state to another. Each post moves through stages.) A visual planner for Instagram posts: track each post's edit status, plan its date and time, keep the inspo (screenshot + link) and show the final thumbnail. Built for one bakery account, with an account switcher for others. See [README.md](README.md) for setup, deployment and sharing.
 
 ## This is NOT the Next.js you know
 
