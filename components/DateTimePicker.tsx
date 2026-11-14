@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   addMonths,
   eachDayOfInterval,
@@ -14,6 +14,7 @@ import {
   startOfWeek,
 } from "date-fns";
 import { CalendarDays, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useDismiss } from "@/lib/useDismiss";
 
 const FORMAT = "yyyy-MM-dd'T'HH:mm";
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
@@ -47,23 +48,7 @@ export default function DateTimePicker({
   };
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.stopPropagation();
-      setOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey, true);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey, true);
-    };
-  }, [open]);
+  useDismiss(ref, open, () => setOpen(false));
 
   const days = useMemo(
     () =>

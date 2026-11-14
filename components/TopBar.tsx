@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays, Check, ChevronDown, Columns3, Copy, Link2, ListTodo, Pencil, Plus, RotateCcw } from "lucide-react";
 import { getShareTokenAction, resetShareTokenAction } from "@/app/actions";
+import { useDismiss } from "@/lib/useDismiss";
 import { useExit } from "@/lib/useExit";
 import { VIEWS as VIEW_ORDER, type View } from "@/lib/views";
 import { usePlanner } from "./PlannerProvider";
@@ -107,19 +108,7 @@ function AccountSwitcher({ view }: { view: string }) {
   const [dialog, setDialog] = useState<"add" | "rename" | "share" | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (!ref.current?.contains(e.target as Node)) setOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  useDismiss(ref, open, () => setOpen(false));
 
   // A guest with a single shared account has nothing to switch to.
   if (!isOwner && accounts.length <= 1) {
