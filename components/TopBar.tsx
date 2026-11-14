@@ -8,6 +8,7 @@ import { getShareTokenAction, resetShareTokenAction } from "@/app/actions";
 import { useDismiss } from "@/lib/useDismiss";
 import { useExit } from "@/lib/useExit";
 import { VIEWS as VIEW_ORDER, type View } from "@/lib/views";
+import Logo from "./Logo";
 import { usePlanner } from "./PlannerProvider";
 
 const META: Record<View, { label: string; Icon: typeof CalendarDays }> = {
@@ -38,6 +39,7 @@ export default function TopBar() {
     <>
       <header className="sticky top-0 z-30 border-b border-line bg-bg">
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4">
+          <Logo size={32} className="hidden shrink-0 md:block" />
           <AccountSwitcher view={current} />
           <nav
             className="relative mx-auto hidden grid-cols-3 rounded-lg border border-line bg-card p-1 md:grid"
