@@ -31,17 +31,18 @@ There is no test suite. Check changes with `npm run lint`, `npm run build` and b
 ## Project layout
 
 - `app/` — routes
-  - `[account]/[view]` — calendar, board and upcoming views for one account (`layout.tsx`, `template.tsx` handle the shell and view transitions)
+  - `[account]/[view]` — calendar, board and upcoming views for one account (`layout.tsx` is the shell; `page.tsx` renders `components/ViewSwitcher`, which follows the URL so tab switches never hit the server)
   - `s/[token]` — share-link entry; `unlock/` and `api/unlock` — passcode gate; `api/upload` — image upload
   - `actions.ts` — server actions
   - `globals.css` — the design system (see below)
-- `components/` — `CalendarView`, `BoardView`, `UpcomingView`, `PostDrawer`, `PostThumb`, `TopBar`, `DateTimePicker`, `ImageField`, `TypeIcon`, `PlannerProvider`
-- `lib/` — `store.ts` (data store interface, Supabase and JSON-file implementations), `types.ts` (statuses, post types, `Account`, `Post`), `dates.ts`, `image.ts`, `auth.ts`, `access.ts`, `motion.ts`, `useExit.ts`
+- `components/` — `ViewSwitcher`, `CalendarView`, `BoardView`, `UpcomingView`, `PostDrawer`, `PostThumb`, `TopBar`, `DateTimePicker`, `ImageField`, `TypeIcon`, `PlannerProvider`
+- `lib/` — `store.ts` (data store interface, Supabase and JSON-file implementations), `types.ts` (statuses, post types, `Account`, `Post`), `dates.ts`, `image.ts`, `auth.ts`, `access.ts`, `motion.ts`, `useExit.ts`, `views.ts`
 - `proxy.ts` — coarse auth gate (this Next.js version uses `proxy.ts`, not `middleware.ts`)
 - `supabase/schema.sql` — database schema
 
 ## Domain rules
 
+- **Switching views stays client-side**: the tab bar changes the URL with `history.pushState` and every view renders from `PlannerProvider` state. Don't turn view switches back into server navigations (`<Link>` default / `router.push`); that adds a round trip per click.
 - Statuses, in order: Idea → To edit → Editing → Ready → Posted. Post types: reel, photo, carousel, story. Both live in `lib/types.ts`; add to them there rather than hardcoding labels or colours elsewhere.
 - **Post times are stored as wall-clock time**: the UTC fields of the ISO string hold the time the user picked, with no timezone conversion. Always go through `lib/dates.ts` to read, write or display them. Display is 12-hour.
 - **Access**: the passcode makes someone an owner (sees every account). A share link (`/s/<token>`) makes them a guest for exactly one account. `proxy.ts` is only a coarse gate; the real per-account check is `canAccess` in `lib/access.ts` and must run server-side for any data read or write.
@@ -59,6 +60,7 @@ All shared styling and motion live in [app/globals.css](app/globals.css) (the "E
 - **Press feedback**: `.tap` for clickable controls, `.tap` + `.tap-surface` for rows and cards. Don't write custom `:active` / hover scale styles.
 - **Floating layers**: `.menu` (stays mounted, toggle `data-open`), `.reveal` / `.reveal-up` (mount on demand), `.scrim`, `.panel`. Exit by setting `data-closing="true"` via `useExit`. Don't add fade or pop animations.
 - **Content motion**: `.slide-x` with `--dir`; `t-move` for transition timing on indicators and chevrons.
+- **Hover actions**: `.hover-reveal` for secondary actions along the bottom of a `.group` (slides up on hover, always visible on touch).
 - **Icons and shared components**: check `components/` (e.g. `TypeIcon`, `DateTimePicker`, `ImageField`) before building a new one.
 - Respect small screens: inputs stay at 16px (stops iOS zoom), layers become bottom sheets on phones, and `prefers-reduced-motion` is already handled globally.
 
