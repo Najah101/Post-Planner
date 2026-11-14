@@ -4,10 +4,9 @@ import { addDays, format, isToday, isTomorrow, startOfDay } from "date-fns";
 import { wall } from "@/lib/dates";
 import type { Post } from "@/lib/types";
 import { Plus, Sparkles } from "lucide-react";
-import { TYPE_META } from "@/lib/types";
+import { STATUS_META } from "@/lib/types";
 import { usePlanner } from "./PlannerProvider";
-import PostThumb, { StatusChip } from "./PostThumb";
-import TypeIcon from "./TypeIcon";
+import PostThumb from "./PostThumb";
 
 type Group = { label: string; posts: Post[]; tone?: "overdue" };
 
@@ -72,24 +71,30 @@ export default function UpcomingView() {
             >
               {g.label} · {g.posts.length}
             </h2>
-            <ul className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <ul className="grid grid-cols-4 gap-x-2 gap-y-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12">
               {g.posts.map((p) => (
                 <li key={p.id} className="min-w-0">
-                  <button onClick={() => openPost(p.id)} className="tap tap-surface group block w-full text-left">
-                    <PostThumb
-                      post={p}
-                      showBadge
-                      className="aspect-[4/5] w-full rounded-lg border border-line transition-colors group-hover:border-edge"
-                    />
-                    <h3 className="mt-2 line-clamp-2 text-sm font-semibold leading-snug">{p.title}</h3>
-                    <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
-                      <StatusChip status={p.status} />
-                      <span className="inline-flex items-center gap-1 text-xs text-muted">
-                        <TypeIcon type={p.post_type} /> {TYPE_META[p.post_type].label}
-                      </span>
+                  <button
+                    onClick={() => openPost(p.id)}
+                    title={p.title}
+                    className="tap tap-surface group block w-full text-left"
+                  >
+                    <div className="relative">
+                      <PostThumb
+                        post={p}
+                        className="aspect-[4/5] w-full rounded-md border border-line transition-colors group-hover:border-edge"
+                      />
+                      <span
+                        className="absolute left-1 top-1 size-2 rounded-full ring-2 ring-black/40"
+                        style={{ background: STATUS_META[p.status].color }}
+                        aria-label={STATUS_META[p.status].label}
+                      />
                     </div>
-                    <p className={`mt-1 text-xs font-medium ${g.tone === "overdue" ? "text-hl" : "text-ink2"}`}>
-                      {p.planned_at ? format(wall(p.planned_at), "EEE d MMM · h:mm a") : "Pick a date"}
+                    <h3 className="mt-1.5 truncate text-xs font-semibold">{p.title}</h3>
+                    <p
+                      className={`truncate text-[11px] font-medium ${g.tone === "overdue" ? "text-hl" : "text-muted"}`}
+                    >
+                      {p.planned_at ? format(wall(p.planned_at), "d MMM · h:mm a") : "No date"}
                     </p>
                   </button>
                 </li>
