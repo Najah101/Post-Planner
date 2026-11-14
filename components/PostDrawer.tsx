@@ -9,6 +9,8 @@ import { fromLocalInput, toLocalInput } from "@/lib/dates";
 import { usePlanner } from "./PlannerProvider";
 import ImageField from "./ImageField";
 import DateTimePicker from "./DateTimePicker";
+import Select from "./Select";
+import TypeIcon from "./TypeIcon";
 
 export default function PostDrawer({
   post,
@@ -160,18 +162,16 @@ export default function PostDrawer({
             </div>
             <div>
               <label className="label" htmlFor="type">Post type</label>
-              <select
+              <Select
                 id="type"
-                className="field"
                 value={postType}
-                onChange={(e) => setPostType(e.target.value as PostType)}
-              >
-                {POST_TYPES.map((t) => (
-                  <option key={t} value={t}>
-                    {TYPE_META[t].label}
-                  </option>
-                ))}
-              </select>
+                onChange={setPostType}
+                options={POST_TYPES.map((t) => ({
+                  value: t,
+                  label: TYPE_META[t].label,
+                  icon: <TypeIcon type={t} size={16} />,
+                }))}
+              />
             </div>
           </div>
 
