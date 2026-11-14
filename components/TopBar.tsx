@@ -6,13 +6,26 @@ import { useEffect, useRef, useState } from "react";
 import { CalendarDays, Check, ChevronDown, Columns3, Copy, Link2, ListTodo, Pencil, Plus, RotateCcw } from "lucide-react";
 import { getShareTokenAction, resetShareTokenAction } from "@/app/actions";
 import { useExit } from "@/lib/useExit";
+import { VIEWS as VIEW_ORDER, type View } from "@/lib/views";
 import { usePlanner } from "./PlannerProvider";
 
-const VIEWS = [
-  { slug: "calendar", label: "Calendar", Icon: CalendarDays },
-  { slug: "board", label: "Board", Icon: Columns3 },
-  { slug: "upcoming", label: "Upcoming", Icon: ListTodo },
-] as const;
+const META: Record<View, { label: string; Icon: typeof CalendarDays }> = {
+  calendar: { label: "Calendar", Icon: CalendarDays },
+  board: { label: "Board", Icon: Columns3 },
+  upcoming: { label: "Upcoming", Icon: ListTodo },
+};
+const VIEWS = VIEW_ORDER.map((slug) => ({ slug, ...META[slug] }));
+
+/**
+ * Switch views without a server round trip: every view renders from data already in the
+ * browser, so just change the URL (ViewSwitcher follows it). Modified clicks (new tab etc.)
+ * fall through to the normal link.
+ */
+function switchView(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+  if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  e.preventDefault();
+  if (window.location.pathname !== href) window.history.pushState(null, "", href);
+}
 
 export default function TopBar() {
   const { account, newPost } = usePlanner();
@@ -38,6 +51,8 @@ export default function TopBar() {
               <Link
                 key={v.slug}
                 href={`/${account.id}/${v.slug}`}
+                prefetch={false}
+                onClick={(e) => switchView(e, `/${account.id}/${v.slug}`)}
                 aria-current={v.slug === current ? "page" : undefined}
                 className={`tap relative z-10 flex w-28 items-center justify-center gap-1.5 rounded-md py-1.5 text-sm font-medium no-underline ${
                   v.slug === current ? "text-ink" : "text-muted hover:text-ink"
@@ -69,6 +84,8 @@ export default function TopBar() {
           <Link
             key={v.slug}
             href={`/${account.id}/${v.slug}`}
+            prefetch={false}
+            onClick={(e) => switchView(e, `/${account.id}/${v.slug}`)}
             aria-current={v.slug === current ? "page" : undefined}
             className={`tap flex flex-1 flex-col items-center gap-1 py-2.5 text-xs font-medium no-underline ${
               v.slug === current ? "text-ink" : "text-muted"
