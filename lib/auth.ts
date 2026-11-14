@@ -19,7 +19,7 @@ export async function sessionToken(): Promise<string> {
     false,
     ["sign"],
   );
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode("post-planner-v1"));
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode("metabasis-v1"));
   return Array.from(new Uint8Array(sig))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
