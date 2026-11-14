@@ -35,8 +35,8 @@ There is no test suite. Check changes with `npm run lint`, `npm run build` and b
   - `s/[token]` — share-link entry; `unlock/` and `api/unlock` — passcode gate; `api/upload` — image upload
   - `actions.ts` — server actions
   - `globals.css` — the design system (see below)
-- `components/` — `ViewSwitcher`, `CalendarView`, `BoardView`, `UpcomingView`, `PostDrawer`, `PostThumb`, `TopBar`, `DateTimePicker`, `ImageField`, `TypeIcon`, `PlannerProvider`
-- `lib/` — `store.ts` (data store interface, Supabase and JSON-file implementations), `types.ts` (statuses, post types, `Account`, `Post`), `dates.ts`, `image.ts`, `auth.ts`, `access.ts`, `motion.ts`, `useExit.ts`, `views.ts`
+- `components/` — `ViewSwitcher`, `CalendarView`, `BoardView`, `UpcomingView`, `PostDrawer`, `PostThumb`, `TopBar`, `DateTimePicker`, `ImageField`, `TypeIcon`, `Select`, `PlannerProvider`
+- `lib/` — `store.ts` (data store interface, Supabase and JSON-file implementations), `types.ts` (statuses, post types, `Account`, `Post`), `dates.ts`, `image.ts`, `auth.ts`, `access.ts`, `motion.ts`, `useExit.ts`, `useDismiss.ts`, `views.ts`
 - `proxy.ts` — coarse auth gate (this Next.js version uses `proxy.ts`, not `middleware.ts`)
 - `supabase/schema.sql` — database schema
 
@@ -58,10 +58,12 @@ All shared styling and motion live in [app/globals.css](app/globals.css) (the "E
 - **Colours, radius, shadows, timing**: use the CSS variables (`--bg`, `--card`, `--line`, `--text`, `--muted`, `--accent`, `--hl`, `--radius`, `--dur-*`, `--ease-*`) or their Tailwind aliases (`bg-card`, `text-muted`, `border-line`, `text-ink`, `bg-accent`, ...). Never hardcode hex values, durations or easing curves.
 - **Controls**: `.btn` with `.btn-primary` / `.btn-ghost` / `.btn-quiet`, `.copy-btn`, `.field` (inputs and selects), `.label`.
 - **Press feedback**: `.tap` for clickable controls, `.tap` + `.tap-surface` for rows and cards. Don't write custom `:active` / hover scale styles.
+- **Menus and dropdowns**: `.menu` rows use `.menu-item`; close popovers with `useDismiss`. Use `components/Select` instead of a native `<select>` (its option list can't be styled).
+- **Focus**: fields show their own border + glow; everything else gets the global `:focus-visible` outline (in `@layer base`, so components can override it). Keep page-wide rules in `@layer base` or they beat every component class.
 - **Floating layers**: `.menu` (stays mounted, toggle `data-open`), `.reveal` / `.reveal-up` (mount on demand), `.scrim`, `.panel`. Exit by setting `data-closing="true"` via `useExit`. Don't add fade or pop animations.
 - **Content motion**: `.slide-x` with `--dir`; `t-move` for transition timing on indicators and chevrons.
 - **Hover actions**: `.hover-reveal` for secondary actions along the bottom of a `.group` (slides up on hover, always visible on touch).
-- **Icons and shared components**: check `components/` (e.g. `TypeIcon`, `DateTimePicker`, `ImageField`) before building a new one.
+- **Icons and shared components**: check `components/` (e.g. `TypeIcon`, `DateTimePicker`, `ImageField`, `Select`) before building a new one.
 - Respect small screens: inputs stay at 16px (stops iOS zoom), layers become bottom sheets on phones, and `prefers-reduced-motion` is already handled globally.
 
 If something genuinely new is needed, add it to `app/globals.css` (tokens in `:root`, classes in `@layer components`) and, if JS needs the values, mirror them in `lib/motion.ts`. Then use it. Don't inline one-off copies in a component. If a pattern appears in two or more places, extract it into the design system instead of duplicating it.
