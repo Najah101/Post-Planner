@@ -98,9 +98,12 @@ body {
   text-size-adjust: 100%;
 }
 
-:focus-visible {
-  outline: 2px solid var(--hl);
-  outline-offset: 2px;
+/* In the base layer so component classes (e.g. .field, which has its own focus ring) can override it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--hl);
+    outline-offset: 2px;
+  }
 }
 ::selection {
   background: var(--hl);
